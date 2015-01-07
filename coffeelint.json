@@ -1,0 +1,12 @@
+{
+	"no_tabs": {
+		"level": "ignore"
+	},
+	"indentation": {
+		"value": 1,
+		"level": "error"
+	},
+	"no_implicit_returns": {
+		"module": "coffeelint-no-implicit-returns"
+	}
+}
