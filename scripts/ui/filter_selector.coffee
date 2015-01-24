@@ -4,21 +4,16 @@ util = require("./util")
 module.exports = class FilterSelector
 
 	constructor: (tags) ->
-		@menu = (tag for tag in tags)
-		@selection = []
+		@tags = (new Tag(tag) for tag in tags)
 
 		@container = util.getTemplate("filter-selector")
 		rivets.bind(@container, @)
 
 	onSelect: (ev, rv) =>
-		move(rv.tag, @menu, @selection)
+		rv.tag.selected = true
 
 	onDeselect: (ev, rv) =>
-		move(rv.tag, @selection, @menu)
+		rv.tag.selected = false
 
-# move an item between arrays
-move = (item, source, target) ->
-	index = source.indexOf(item)
-	source.splice(index, 1)
-	target.push(item)
-	return
+class Tag
+	constructor: (@name, @selected = false) ->

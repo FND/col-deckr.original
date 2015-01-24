@@ -18,12 +18,12 @@
 
 	<div id="filter-selector-template" class="filter-selector template">
 		<ul class="menu">
-			<li rv-each-tag="menu"
-				rv-on-click="onSelect">{ tag.name }</li>
+			<li rv-each-tag="tags" rv-hide="tag.selected"
+					rv-on-click="onSelect">{ tag.name }</li>
 		</ul>
 		<ul class="selection">
-			<li rv-each-tag="selection"
-				rv-on-click="onDeselect">{ tag.name }</li>
+			<li rv-each-tag="tags" rv-show="tag.selected"
+					rv-on-click="onDeselect">{ tag.name }</li>
 		</ul>
 	</div>
 
