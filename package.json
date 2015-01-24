@@ -19,6 +19,7 @@
     "gulp-rename": "^1.2.0",
     "gulp-sass": "^1.2.4",
     "gulp-util": "^3.0.2",
+    "mocha": "^2.1.0",
     "watchify": "^2.2.1"
   }
 }

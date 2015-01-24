@@ -4,7 +4,7 @@ util = require("./util")
 module.exports = class FilterSelector
 
 	constructor: (tags) ->
-		@menu = (new Tag(tag) for tag in tags)
+		@menu = (tag for tag in tags)
 		@selection = []
 
 		@container = util.getTemplate("filter-selector")
@@ -15,11 +15,6 @@ module.exports = class FilterSelector
 
 	onDeselect: (ev, rv) =>
 		move(rv.tag, @selection, @menu)
-
-class Tag
-
-	constructor: (@name, @selected) ->
-		@tags = [] unless @tags
 
 # move an item between arrays
 move = (item, source, target) ->

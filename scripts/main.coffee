@@ -1,8 +1,23 @@
 Panel = require("./ui/panel")
+Store = require("./store")
 
-data = # XXX: DEBUG
-	cards: [{ title: "hello world" }, { title: "lorem ipsum" }]
+dummies = [{ # XXX: DEBUG
+	title: "hello world"
 	tags: ["foo", "bar", "baz"]
+}, {
+	title: "lorem ipsum"
+	tags: ["foo", "baz"]
+}, {
+	title: "..."
+	tags: ["bar"]
+}]
 
-panel = new Panel(data.cards, filterable: data.tags)
-document.body.appendChild(panel.container)
+store = new Store()
+store.load().
+	then((store) ->
+		store.absorb(item) for item in dummies # XXX: DEBUG
+
+		browser = new Panel(store, filterable: true)
+		document.body.appendChild(browser.container)
+
+		return)

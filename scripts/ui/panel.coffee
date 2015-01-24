@@ -4,18 +4,13 @@ util = require("./util")
 
 module.exports = class Panel
 
-	constructor: (cards, options = {}) ->
-		@cards = (new Card(card.title, card.tags) for card in cards)
+	constructor: (deck, options = {}) ->
+		@cards = (card for title, card of deck.index) # XXX: tight coupling to store!?
 
 		@container = util.getTemplate("panel")
 		rivets.bind(@container, @)
 
-		tags = options.filterable
-		if tags
+		if options.filterable
+			tags = Object.keys(deck.tags) # XXX: tight coupling to store!?
 			filter = new FilterSelector(tags)
 			util.prepend(filter.container, @container) # XXX: belongs into template!?
-
-class Card
-
-	constructor: (@title, @tags) -> # TODO: validate (title, individual tags)
-		@tags = [] unless @tags
