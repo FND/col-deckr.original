@@ -10,11 +10,22 @@
 <body>
 	<h1>Col. Deckr</h1>
 
-	<ul>
-		<li>foo</li>
-		<li>bar</li>
-		<li>baz</li>
-	</ul>
+	<div id="panel-template" class="panel template">
+		<ul class="deck">
+			<li rv-each-card="cards">{ card.title }</li>
+		</ul>
+	</div>
+
+	<div id="filter-selector-template" class="filter-selector template">
+		<ul class="menu">
+			<li rv-each-tag="menu"
+				rv-on-click="onSelect">{ tag.name }</li>
+		</ul>
+		<ul class="selection">
+			<li rv-each-tag="selection"
+				rv-on-click="onDeselect">{ tag.name }</li>
+		</ul>
+	</div>
 
 	<script src="dist/bundle.js"></script>
 </body>

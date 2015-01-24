@@ -3,6 +3,9 @@
   "browserify": {
     "transform": ["coffeeify"]
   },
+  "dependencies": {
+    "rivets": "^0.7.2"
+  },
   "devDependencies": {
     "browserify": "^8.0.3",
     "coffee-script": "^1.8.0",
