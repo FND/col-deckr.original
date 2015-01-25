@@ -20,7 +20,8 @@ module.exports = class Panel
 	onFilter: (status, tag) =>
 		if status is "added"
 			@facetor.filter(tag)
-		#else # TODO: facetor does not currently support deselection
+		else
+			@facetor.defilter(tag)
 
 		@filter.setCandidates(@facetor.tags)
 		for card in @cards

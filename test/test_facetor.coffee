@@ -31,8 +31,7 @@ describe("faceted search", ->
 	it("gradually filters both titles and tags based on co-occurrence", ->
 		facetor = spawn(colors)
 
-		assert.deepEqual(facetor.titles,
-				["white", "black", "purple", "yellow"])
+		assert.deepEqual(facetor.titles, ["white", "black", "purple", "yellow"])
 		assert.deepEqual(facetor.tags, ["red", "green", "blue"])
 
 		facetor.filter("red")
@@ -76,6 +75,34 @@ describe("faceted search", ->
 		assert.deepEqual(facetor.tags, [])
 
 		return)
+
+	it("allows removing existing filters", ->
+		facetor = spawn(colors)
+
+		facetor.filter("red")
+		facetor.filter("green")
+		facetor.filter("blue")
+		assert.deepEqual(facetor.titles, ["white"])
+		assert.deepEqual(facetor.tags, [])
+
+		facetor.defilter("green")
+		assert.deepEqual(facetor.titles, ["white", "purple"])
+		assert.deepEqual(facetor.tags, ["green"])
+
+		facetor.defilter("blue")
+		assert.deepEqual(facetor.titles, ["white", "purple", "yellow"])
+		assert.deepEqual(facetor.tags, ["green", "blue"])
+
+		facetor.defilter("red")
+		assert.deepEqual(facetor.titles, ["white", "black", "purple", "yellow"])
+		assert.deepEqual(facetor.tags, ["red", "green", "blue"])
+
+		facetor.defilter("red")
+		assert.deepEqual(facetor.titles, ["white", "black", "purple", "yellow"])
+		assert.deepEqual(facetor.tags, ["red", "green", "blue"])
+
+		return)
+
 	return)
 
 spawn = (collection) ->
