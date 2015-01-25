@@ -29,5 +29,8 @@ body {
   width: 80%;
   margin: 1em auto; }
 
+.placeholder {
+  opacity: 0.25; }
+
 .template {
   display: none; }
