@@ -36,3 +36,4 @@ class Tag
 	set: (prop, value) -> # XXX: should not be necessary; use computed property?
 		@[prop] = value if value isnt undefined # XXX: special-casing
 		@selectable = not @selected and not @disabled
+		return

@@ -7,6 +7,7 @@ module.exports = class Facetor
 		@titles = Object.keys(@index)
 		@tags = @originalTags.slice()
 		@selection = {} # pseudo-set
+		return
 
 	filter: (tag) -> # XXX: inefficient
 		return if @selection[tag]
