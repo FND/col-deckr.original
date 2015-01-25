@@ -1,3 +1,8 @@
+Col. Deckr
+
+a simple UI for tag-based exploration of trading cards
+
+
 Getting Started
 ---------------
 
