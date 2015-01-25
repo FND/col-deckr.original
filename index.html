@@ -12,13 +12,13 @@
 
 	<div id="panel-template" class="panel template">
 		<ul class="deck">
-			<li rv-each-card="cards">{ card.title }</li>
+			<li rv-each-card="cards" rv-hide="card.disabled">{ card.title }</li>
 		</ul>
 	</div>
 
 	<div id="filter-selector-template" class="filter-selector template">
 		<ul class="menu">
-			<li rv-each-tag="tags" rv-hide="tag.selected"
+			<li rv-each-tag="tags" rv-show="tag.selectable"
 					rv-on-click="onSelect">{ tag.name }</li>
 		</ul>
 		<ul class="selection">

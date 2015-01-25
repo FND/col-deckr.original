@@ -2,14 +2,17 @@ Panel = require("./ui/panel")
 Store = require("./store")
 
 dummies = [{ # XXX: DEBUG
-	title: "hello world"
-	tags: ["foo", "bar", "baz"]
+	title: "Half-Life"
+	tags: ["FPS", "scifi"]
 }, {
-	title: "lorem ipsum"
-	tags: ["foo", "baz"]
+	title: "Unreal"
+	tags: ["FPS", "scifi"]
 }, {
-	title: "..."
-	tags: ["bar"]
+	title: "Command & Conquer"
+	tags: ["RTS", "military", "scifi"]
+}, {
+	title: "Portal"
+	tags: ["FPS", "puzzle", "scifi"]
 }]
 
 store = new Store()
