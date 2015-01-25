@@ -1,0 +1,33 @@
+.deck {
+  overflow: auto;
+  padding: 0;
+  list-style-type: none; }
+
+.card, .deck > li {
+  width: 15em;
+  height: 21em;
+  float: left;
+  margin: 0 0.5em 0.5em 0;
+  border: 1px solid #000;
+  border-radius: 5px;
+  line-height: 21em;
+  text-align: center;
+  background-color: #EEE; }
+
+.filter-selector li {
+  cursor: pointer; }
+
+.filter-selector .selection {
+  overflow: auto;
+  padding: 0;
+  list-style-type: none; }
+  .filter-selector .selection li {
+    float: left;
+    margin-right: 0.5em; }
+
+body {
+  width: 80%;
+  margin: 1em auto; }
+
+.template {
+  display: none; }

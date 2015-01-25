@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Col. Deckr</title>
+	<link rel="stylesheet" href="dist/bundle.css">
+</head>
+
+<body>
+	<h1>Col. Deckr</h1>
+
+	<div id="panel-template" class="panel template">
+		<ul class="deck">
+			<li rv-each-card="cards" rv-hide="card.disabled">{ card.title }</li>
+		</ul>
+	</div>
+
+	<div id="filter-selector-template" class="filter-selector template">
+		<ul class="menu">
+			<li rv-each-tag="tags" rv-show="tag.selectable"
+					rv-on-click="onSelect">{ tag.name }</li>
+		</ul>
+		<ul class="selection">
+			<li rv-each-tag="tags" rv-show="tag.selected"
+					rv-on-click="onDeselect">{ tag.name }</li>
+		</ul>
+	</div>
+
+	<script src="dist/bundle.js"></script>
+</body>
+
+</html>
