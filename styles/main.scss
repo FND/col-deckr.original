@@ -1,3 +1,6 @@
+@import "cards";
+@import "filter_selector";
+
 body {
 	width: 80%; // TODO: increase for small viewports?
 	margin: 1em auto;
@@ -5,8 +8,4 @@ body {
 
 .template {
 	display: none;
-}
-
-.filter-selector li { // TODO: move to separate module
-	cursor: pointer;
 }
