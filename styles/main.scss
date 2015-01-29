@@ -1,0 +1,15 @@
+@import "cards";
+@import "filter_selector";
+
+body {
+	width: 80%; // TODO: increase for small viewports?
+	margin: 1em auto;
+}
+
+.placeholder { // for sortables
+	opacity: 0.25;
+}
+
+.template {
+	display: none;
+}

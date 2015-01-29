@@ -1,0 +1,22 @@
+.deck {
+	overflow: auto; // contain floats
+	padding: 0;
+	list-style-type: none;
+
+	> li {
+		@extend .card;
+	}
+}
+
+.card {
+	$height: 21em;
+	width: 15em;
+	height: $height;
+	float: left;
+	margin: 0 0.5em 0.5em 0;
+	border: 1px solid #000;
+	border-radius: 5px;
+	line-height: $height;
+	text-align: center;
+	background-color: #EEE;
+}

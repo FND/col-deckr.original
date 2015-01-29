@@ -1,0 +1,14 @@
+.filter-selector li {
+	cursor: pointer;
+}
+
+.filter-selector .selection {
+	overflow: auto; // contain floats
+	padding: 0;
+	list-style-type: none;
+
+	li {
+		float: left;
+		margin-right: 0.5em;
+	}
+}
