@@ -1,3 +1,5 @@
+require("whatwg-fetch") # auto-registers globals
+webdav = require("./webdav")
 util = require("./util")
 
 # holds a collection ("deck") of cards, indexed by title and tags
@@ -14,7 +16,7 @@ module.exports = class Store
 
 	# integrate an individual card
 	absorb: (item) ->
-		card = new Card(item)
+		card = new Card(item.title, item.tags, item.body)
 
 		title = card.title
 		util.error("duplicate title", title) if @index[title] # TODO: abort?
@@ -27,13 +29,26 @@ module.exports = class Store
 		return
 
 	# returns a promise for an array cards
-	retrieve: (src) -> # TODO: dummy implementation
-		return new Promise((resolve, reject) ->
-			setTimeout((-> resolve([])), 100) # TODO
-			return)
+	retrieve: (index) ->
+		return webdav.ls(index).
+			then(([dirs, files]) ->
+				items = (resolve(file) for file in files)
+				return Promise.all(items))
 
 class Card
+	constructor: (@title, @tags = [], @body) -> # TODO: validate (title, individual tags)
 
-	constructor: (data) -> # TODO: validate (title, individual tags)
-		@title = data.title
-		@tags = data.tags or []
+resolve = (entry) ->
+	return download(entry.uri).
+		then((txt) -> parse(txt, entry.name))
+
+parse = (txt, defaultTitle) -> # TODO: rename, document
+	lines = txt.split("\n")
+	tags = lines[0].substr(1).split(" #")
+	title = if lines[2] then lines[2].substr(2) else defaultTitle
+	body = lines.slice(3).join("\n")
+	return { title, tags, body }
+
+download = (uri) ->
+	return fetch(uri, method: "GET").
+		then((res) -> res.text())

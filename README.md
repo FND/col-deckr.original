@@ -8,6 +8,7 @@ Getting Started
 
 * ensure [Node](http://nodejs.org) and [Bower](http://bower.io) are installed
 * `npm install` und `bower install` download dependencies
+* `./server` starts a local WebDAV server
 * `gulp styles` and `gulp browserify` compile CSS and JavaScript, respectively -
   this can be automated with `gulp autocompile`
 * `mocha` executes the test suite
