@@ -1,4 +1,53 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/fnd/Dev/web/deckr/node_modules/dav-dump/src/xml.coffee":[function(require,module,exports){
+var parseEntry, traverse,
+  __slice = [].slice;
+
+exports.extractEntries = function(doc) {
+  var dirs, entry, files, i, list, _i, _len, _ref;
+  dirs = [];
+  files = [];
+  _ref = doc.getElementsByTagNameNS("DAV:", "response");
+  for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+    entry = _ref[i];
+    entry = parseEntry(entry);
+    if (i === 0) {
+      continue;
+    }
+    list = entry.dir ? dirs : files;
+    list.push(entry.name);
+  }
+  return [dirs, files];
+};
+
+parseEntry = function(entry) {
+  var name, uri;
+  uri = entry.getElementsByTagNameNS("DAV:", "href")[0].textContent;
+  uri = uri.replace(/\/$/, "");
+  name = uri.split("/").pop();
+  entry = {
+    name: decodeURIComponent(name),
+    dir: !!traverse(entry, "propstat", "prop", "resourcetype", "collection")
+  };
+  return entry;
+};
+
+traverse = function() {
+  var node, part, path, root;
+  root = arguments[0], path = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  node = root;
+  while (path.length) {
+    part = path.shift();
+    if (!node) {
+      return null;
+    }
+    node = node.getElementsByTagNameNS("DAV:", part)[0];
+  }
+  return node;
+};
+
+
+
+},{}],"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js":[function(require,module,exports){
 // Rivets.js
 // version: 0.7.2
 // author: Michael Richards
@@ -1295,7 +1344,7 @@
 
 }).call(this);
 
-},{"sightglass":2}],2:[function(require,module,exports){
+},{"sightglass":"/Users/fnd/Dev/web/deckr/node_modules/rivets/node_modules/sightglass/index.js"}],"/Users/fnd/Dev/web/deckr/node_modules/rivets/node_modules/sightglass/index.js":[function(require,module,exports){
 (function() {
   // Public sightglass interface.
   function sightglass(obj, keypath, callback, options) {
@@ -1500,7 +1549,7 @@
   }
 }).call(this)
 
-},{}],3:[function(require,module,exports){
+},{}],"/Users/fnd/Dev/web/deckr/node_modules/sortablejs/Sortable.js":[function(require,module,exports){
 /**!
  * Sortable
  * @author	RubaXa   <trash@rubaxa.org>
@@ -2502,14 +2551,340 @@
 	return Sortable;
 });
 
-},{}],4:[function(require,module,exports){
+},{}],"/Users/fnd/Dev/web/deckr/node_modules/whatwg-fetch/fetch.js":[function(require,module,exports){
+(function() {
+  'use strict';
+
+  if (self.fetch) {
+    return
+  }
+
+  function Headers(headers) {
+    this.map = {}
+
+    var self = this
+    if (headers instanceof Headers) {
+      headers.forEach(function(name, values) {
+        values.forEach(function(value) {
+          self.append(name, value)
+        })
+      })
+
+    } else if (headers) {
+      Object.getOwnPropertyNames(headers).forEach(function(name) {
+        self.append(name, headers[name])
+      })
+    }
+  }
+
+  Headers.prototype.append = function(name, value) {
+    name = name.toLowerCase()
+    var list = this.map[name]
+    if (!list) {
+      list = []
+      this.map[name] = list
+    }
+    list.push(value)
+  }
+
+  Headers.prototype['delete'] = function(name) {
+    delete this.map[name.toLowerCase()]
+  }
+
+  Headers.prototype.get = function(name) {
+    var values = this.map[name.toLowerCase()]
+    return values ? values[0] : null
+  }
+
+  Headers.prototype.getAll = function(name) {
+    return this.map[name.toLowerCase()] || []
+  }
+
+  Headers.prototype.has = function(name) {
+    return this.map.hasOwnProperty(name.toLowerCase())
+  }
+
+  Headers.prototype.set = function(name, value) {
+    this.map[name.toLowerCase()] = [value]
+  }
+
+  // Instead of iterable for now.
+  Headers.prototype.forEach = function(callback) {
+    var self = this
+    Object.getOwnPropertyNames(this.map).forEach(function(name) {
+      callback(name, self.map[name])
+    })
+  }
+
+  function consumed(body) {
+    if (body.bodyUsed) {
+      return Promise.reject(new TypeError('Already read'))
+    }
+    body.bodyUsed = true
+  }
+
+  function fileReaderReady(reader) {
+    return new Promise(function(resolve, reject) {
+      reader.onload = function() {
+        resolve(reader.result)
+      }
+      reader.onerror = function() {
+        reject(reader.error)
+      }
+    })
+  }
+
+  function readBlobAsArrayBuffer(blob) {
+    var reader = new FileReader()
+    reader.readAsArrayBuffer(blob)
+    return fileReaderReady(reader)
+  }
+
+  function readBlobAsText(blob) {
+    var reader = new FileReader()
+    reader.readAsText(blob)
+    return fileReaderReady(reader)
+  }
+
+  var support = {
+    blob: 'FileReader' in self && 'Blob' in self && (function() {
+      try {
+        new Blob();
+        return true
+      } catch(e) {
+        return false
+      }
+    })(),
+    formData: 'FormData' in self
+  }
+
+  function Body() {
+    this.bodyUsed = false
+
+    if (support.blob) {
+      this._initBody = function(body) {
+        this._bodyInit = body
+        if (typeof body === 'string') {
+          this._bodyText = body
+        } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
+          this._bodyBlob = body
+        } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+          this._bodyFormData = body
+        } else if (!body) {
+          this._bodyText = ''
+        } else {
+          throw new Error('unsupported BodyInit type')
+        }
+      }
+
+      this.blob = function() {
+        var rejected = consumed(this)
+        if (rejected) {
+          return rejected
+        }
+
+        if (this._bodyBlob) {
+          return Promise.resolve(this._bodyBlob)
+        } else if (this._bodyFormData) {
+          throw new Error('could not read FormData body as blob')
+        } else {
+          return Promise.resolve(new Blob([this._bodyText]))
+        }
+      }
+
+      this.arrayBuffer = function() {
+        return this.blob().then(readBlobAsArrayBuffer)
+      }
+
+      this.text = function() {
+        var rejected = consumed(this)
+        if (rejected) {
+          return rejected
+        }
+
+        if (this._bodyBlob) {
+          return readBlobAsText(this._bodyBlob)
+        } else if (this._bodyFormData) {
+          throw new Error('could not read FormData body as text')
+        } else {
+          return Promise.resolve(this._bodyText)
+        }
+      }
+    } else {
+      this._initBody = function(body) {
+        this._bodyInit = body
+        if (typeof body === 'string') {
+          this._bodyText = body
+        } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+          this._bodyFormData = body
+        } else if (!body) {
+          this._bodyText = ''
+        } else {
+          throw new Error('unsupported BodyInit type')
+        }
+      }
+
+      this.text = function() {
+        var rejected = consumed(this)
+        return rejected ? rejected : Promise.resolve(this._bodyText)
+      }
+    }
+
+    if (support.formData) {
+      this.formData = function() {
+        return this.text().then(decode)
+      }
+    }
+
+    this.json = function() {
+      return this.text().then(JSON.parse)
+    }
+
+    return this
+  }
+
+  // HTTP methods whose capitalization should be normalized
+  var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT']
+
+  function normalizeMethod(method) {
+    var upcased = method.toUpperCase()
+    return (methods.indexOf(upcased) > -1) ? upcased : method
+  }
+
+  function Request(url, options) {
+    options = options || {}
+    this.url = url
+
+    this.credentials = options.credentials || 'omit'
+    this.headers = new Headers(options.headers)
+    this.method = normalizeMethod(options.method || 'GET')
+    this.mode = options.mode || null
+    this.referrer = null
+
+    if ((this.method === 'GET' || this.method === 'HEAD') && options.body) {
+      throw new TypeError('Body not allowed for GET or HEAD requests')
+    }
+    this._initBody(options.body)
+  }
+
+  function decode(body) {
+    var form = new FormData()
+    body.trim().split('&').forEach(function(bytes) {
+      if (bytes) {
+        var split = bytes.split('=')
+        var name = split.shift().replace(/\+/g, ' ')
+        var value = split.join('=').replace(/\+/g, ' ')
+        form.append(decodeURIComponent(name), decodeURIComponent(value))
+      }
+    })
+    return form
+  }
+
+  function headers(xhr) {
+    var head = new Headers()
+    var pairs = xhr.getAllResponseHeaders().trim().split('\n')
+    pairs.forEach(function(header) {
+      var split = header.trim().split(':')
+      var key = split.shift().trim()
+      var value = split.join(':').trim()
+      head.append(key, value)
+    })
+    return head
+  }
+
+  Request.prototype.fetch = function() {
+    var self = this
+
+    return new Promise(function(resolve, reject) {
+      var xhr = new XMLHttpRequest()
+      if (self.credentials === 'cors') {
+        xhr.withCredentials = true;
+      }
+
+      function responseURL() {
+        if ('responseURL' in xhr) {
+          return xhr.responseURL
+        }
+
+        // Avoid security warnings on getResponseHeader when not allowed by CORS
+        if (/^X-Request-URL:/m.test(xhr.getAllResponseHeaders())) {
+          return xhr.getResponseHeader('X-Request-URL')
+        }
+
+        return;
+      }
+
+      xhr.onload = function() {
+        var status = (xhr.status === 1223) ? 204 : xhr.status
+        if (status < 100 || status > 599) {
+          reject(new TypeError('Network request failed'))
+          return
+        }
+        var options = {
+          status: status,
+          statusText: xhr.statusText,
+          headers: headers(xhr),
+          url: responseURL()
+        }
+        var body = 'response' in xhr ? xhr.response : xhr.responseText;
+        resolve(new Response(body, options))
+      }
+
+      xhr.onerror = function() {
+        reject(new TypeError('Network request failed'))
+      }
+
+      xhr.open(self.method, self.url, true)
+      if ('responseType' in xhr && support.blob) {
+        xhr.responseType = 'blob'
+      }
+
+      self.headers.forEach(function(name, values) {
+        values.forEach(function(value) {
+          xhr.setRequestHeader(name, value)
+        })
+      })
+
+      xhr.send(typeof self._bodyInit === 'undefined' ? null : self._bodyInit)
+    })
+  }
+
+  Body.call(Request.prototype)
+
+  function Response(bodyInit, options) {
+    if (!options) {
+      options = {}
+    }
+
+    this._initBody(bodyInit)
+    this.type = 'default'
+    this.url = null
+    this.status = options.status
+    this.statusText = options.statusText
+    this.headers = options.headers
+    this.url = options.url || ''
+  }
+
+  Body.call(Response.prototype)
+
+  self.Headers = Headers;
+  self.Request = Request;
+  self.Response = Response;
+
+  self.fetch = function (url, options) {
+    return new Request(url, options).fetch()
+  }
+  self.fetch.polyfill = true
+})();
+
+},{}],"/Users/fnd/Dev/web/deckr/scripts/facetor.coffee":[function(require,module,exports){
 var Facetor,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 module.exports = Facetor = (function() {
-  function Facetor(index, originalTags) {
-    this.index = index;
-    this.originalTags = originalTags != null ? originalTags : [];
+  function Facetor(_at_index, _at_originalTags) {
+    this.index = _at_index;
+    this.originalTags = _at_originalTags != null ? _at_originalTags : [];
     this.init();
   }
 
@@ -2567,8 +2942,8 @@ module.exports = Facetor = (function() {
 
 
 
-},{}],5:[function(require,module,exports){
-var Panel, Store, dummies, i, item, selection, store;
+},{}],"/Users/fnd/Dev/web/deckr/scripts/main.coffee":[function(require,module,exports){
+var Panel, Store, dummies, store;
 
 Panel = require("./ui/panel");
 
@@ -2590,33 +2965,34 @@ dummies = [
   }
 ];
 
-selection = (function() {
-  var _i, _len, _results;
-  _results = [];
-  for (i = _i = 0, _len = dummies.length; _i < _len; i = ++_i) {
-    item = dummies[i];
-    if (i === 0 || i === 3) {
-      _results.push(item);
-    }
-  }
-  return _results;
-})();
-
 store = new Store();
 
-store.load().then(function(store) {
-  var browser, rack, rackStore, _i, _j, _len, _len1;
+store.load("/test/fixtures/store/").then(function(err) {
+  var browser, card, item, rack, rackStore, selection, title, _i, _j, _len, _len1;
+  for (_i = 0, _len = dummies.length; _i < _len; _i++) {
+    item = dummies[_i];
+    store.absorb(item);
+  }
+  selection = (function() {
+    var _ref, _results;
+    _ref = store.index;
+    _results = [];
+    for (title in _ref) {
+      card = _ref[title];
+      if (Math.random() < 0.7) {
+        continue;
+      }
+      _results.push(card);
+    }
+    return _results;
+  })();
   rackStore = new Store();
-  for (_i = 0, _len = selection.length; _i < _len; _i++) {
-    item = selection[_i];
+  for (_j = 0, _len1 = selection.length; _j < _len1; _j++) {
+    item = selection[_j];
     rackStore.absorb(item);
   }
   rack = new Panel(rackStore);
   document.body.appendChild(rack.container);
-  for (_j = 0, _len1 = dummies.length; _j < _len1; _j++) {
-    item = dummies[_j];
-    store.absorb(item);
-  }
   browser = new Panel(store, {
     filterable: true
   });
@@ -2625,8 +3001,12 @@ store.load().then(function(store) {
 
 
 
-},{"./store":6,"./ui/panel":8}],6:[function(require,module,exports){
-var Card, Store, util;
+},{"./store":"/Users/fnd/Dev/web/deckr/scripts/store.coffee","./ui/panel":"/Users/fnd/Dev/web/deckr/scripts/ui/panel.coffee"}],"/Users/fnd/Dev/web/deckr/scripts/store.coffee":[function(require,module,exports){
+var Card, Store, download, parse, resolve, util, webdav;
+
+require("whatwg-fetch");
+
+webdav = require("./webdav");
 
 util = require("./util");
 
@@ -2651,7 +3031,7 @@ module.exports = Store = (function() {
 
   Store.prototype.absorb = function(item) {
     var card, tag, title, _base, _i, _len, _ref;
-    card = new Card(item);
+    card = new Card(item.title, item.tags, item.body);
     title = card.title;
     if (this.index[title]) {
       util.error("duplicate title", title);
@@ -2665,11 +3045,20 @@ module.exports = Store = (function() {
     }
   };
 
-  Store.prototype.retrieve = function(src) {
-    return new Promise(function(resolve, reject) {
-      setTimeout((function() {
-        return resolve([]);
-      }), 100);
+  Store.prototype.retrieve = function(index) {
+    return webdav.ls(index).then(function(_arg) {
+      var dirs, file, files, items;
+      dirs = _arg[0], files = _arg[1];
+      items = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = files.length; _i < _len; _i++) {
+          file = files[_i];
+          _results.push(resolve(file));
+        }
+        return _results;
+      })();
+      return Promise.all(items);
     });
   };
 
@@ -2678,18 +3067,46 @@ module.exports = Store = (function() {
 })();
 
 Card = (function() {
-  function Card(data) {
-    this.title = data.title;
-    this.tags = data.tags || [];
+  function Card(_at_title, _at_tags, _at_body) {
+    this.title = _at_title;
+    this.tags = _at_tags != null ? _at_tags : [];
+    this.body = _at_body;
   }
 
   return Card;
 
 })();
 
+resolve = function(entry) {
+  return download(entry.uri).then(function(txt) {
+    return parse(txt, entry.name);
+  });
+};
+
+parse = function(txt, defaultTitle) {
+  var body, lines, tags, title;
+  lines = txt.split("\n");
+  tags = lines[0].substr(1).split(" #");
+  title = lines[2] ? lines[2].substr(2) : defaultTitle;
+  body = lines.slice(3).join("\n");
+  return {
+    title: title,
+    tags: tags,
+    body: body
+  };
+};
+
+download = function(uri) {
+  return fetch(uri, {
+    method: "GET"
+  }).then(function(res) {
+    return res.text();
+  });
+};
 
 
-},{"./util":11}],7:[function(require,module,exports){
+
+},{"./util":"/Users/fnd/Dev/web/deckr/scripts/util.coffee","./webdav":"/Users/fnd/Dev/web/deckr/scripts/webdav.coffee","whatwg-fetch":"/Users/fnd/Dev/web/deckr/node_modules/whatwg-fetch/fetch.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/filter_selector.coffee":[function(require,module,exports){
 var FilterSelector, Tag, rivets, util,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -2751,10 +3168,10 @@ module.exports = FilterSelector = (function() {
 })();
 
 Tag = (function() {
-  function Tag(name, selected, disabled) {
-    this.name = name;
-    this.selected = selected;
-    this.disabled = disabled;
+  function Tag(_at_name, _at_selected, _at_disabled) {
+    this.name = _at_name;
+    this.selected = _at_selected;
+    this.disabled = _at_disabled;
     this.set();
   }
 
@@ -2771,7 +3188,7 @@ Tag = (function() {
 
 
 
-},{"./util":10,"rivets":1}],8:[function(require,module,exports){
+},{"./util":"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee","rivets":"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/panel.coffee":[function(require,module,exports){
 var Card, Facetor, FilterSelector, Panel, rivets, sortable, util,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -2839,10 +3256,10 @@ module.exports = Panel = (function() {
 })();
 
 Card = (function() {
-  function Card(title, tags, disabled) {
-    this.title = title;
-    this.tags = tags;
-    this.disabled = disabled;
+  function Card(_at_title, _at_tags, _at_disabled) {
+    this.title = _at_title;
+    this.tags = _at_tags;
+    this.disabled = _at_disabled;
   }
 
   return Card;
@@ -2851,7 +3268,7 @@ Card = (function() {
 
 
 
-},{"../facetor":4,"./filter_selector":7,"./sortable":9,"./util":10,"rivets":1}],9:[function(require,module,exports){
+},{"../facetor":"/Users/fnd/Dev/web/deckr/scripts/facetor.coffee","./filter_selector":"/Users/fnd/Dev/web/deckr/scripts/ui/filter_selector.coffee","./sortable":"/Users/fnd/Dev/web/deckr/scripts/ui/sortable.coffee","./util":"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee","rivets":"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/sortable.coffee":[function(require,module,exports){
 var Sortable;
 
 Sortable = require("sortablejs");
@@ -2868,10 +3285,10 @@ module.exports = function(list, groupName, itemSelector) {
 
 
 
-},{"sortablejs":3}],10:[function(require,module,exports){
+},{"sortablejs":"/Users/fnd/Dev/web/deckr/node_modules/sortablejs/Sortable.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee":[function(require,module,exports){
 exports.getTemplate = function(name) {
   var clone, node;
-  node = document.getElementById("" + name + "-template");
+  node = document.getElementById(name + "-template");
   if (!node) {
     return false;
   }
@@ -2893,7 +3310,7 @@ exports.prepend = function(node, parent) {
 
 
 
-},{}],11:[function(require,module,exports){
+},{}],"/Users/fnd/Dev/web/deckr/scripts/util.coffee":[function(require,module,exports){
 (function (global){
 var __slice = [].slice;
 
@@ -2913,4 +3330,58 @@ exports.error = function() {
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[5]);
+},{}],"/Users/fnd/Dev/web/deckr/scripts/webdav.coffee":[function(require,module,exports){
+var name2entry, xml;
+
+require("whatwg-fetch");
+
+xml = require("dav-dump/src/xml");
+
+exports.ls = function(uri) {
+  return fetch(uri, {
+    method: "PROPFIND",
+    headers: {
+      Depth: 1
+    }
+  }).then(function(res) {
+    return res.text();
+  }).then(function(txt) {
+    var doc, entries, list, lists, name, parser;
+    parser = new DOMParser();
+    doc = parser.parseFromString(txt, "text/xml");
+    lists = (function() {
+      var _i, _len, _ref, _results;
+      _ref = xml.extractEntries(doc);
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        list = _ref[_i];
+        entries = (function() {
+          var _j, _len1, _results1;
+          _results1 = [];
+          for (_j = 0, _len1 = list.length; _j < _len1; _j++) {
+            name = list[_j];
+            _results1.push(name2entry(uri, name));
+          }
+          return _results1;
+        })();
+        _results.push(entries);
+      }
+      return _results;
+    })();
+    return lists;
+  });
+};
+
+name2entry = function(root, name) {
+  var uri;
+  root = root.replace(/\/$/, "");
+  uri = [root, name].join("/");
+  return {
+    name: name,
+    uri: uri
+  };
+};
+
+
+
+},{"dav-dump/src/xml":"/Users/fnd/Dev/web/deckr/node_modules/dav-dump/src/xml.coffee","whatwg-fetch":"/Users/fnd/Dev/web/deckr/node_modules/whatwg-fetch/fetch.js"}]},{},["/Users/fnd/Dev/web/deckr/scripts/main.coffee"]);
