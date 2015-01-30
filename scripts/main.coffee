@@ -2,7 +2,7 @@ Panel = require("./ui/panel")
 Store = require("./store")
 
 store = new Store()
-store.load("/test/fixtures/store/"). # XXX: DEBUG
+store.load("./test/fixtures/store/"). # XXX: DEBUG
 	then((store) ->
 		selection = for title, card of store.index
 			continue if Math.random() < 0.7
