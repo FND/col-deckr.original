@@ -6,7 +6,8 @@
   "dependencies": {
     "dav-dump": "git+https://github.com/FND/dav-dump.git",
     "rivets": "^0.7.2",
-    "sortablejs": "^1.0.0"
+    "sortablejs": "^1.0.0",
+    "whatwg-fetch": "^0.7.0"
   },
   "devDependencies": {
     "browserify": "^9.0.3",
