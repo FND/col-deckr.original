@@ -23,11 +23,11 @@
 	</div>
 
 	<div id="filter-selector-template" class="filter-selector template">
-		<ul class="menu">
+		<ul class="menu tags">
 			<li rv-each-tag="tags" rv-show="tag.selectable"
 					rv-on-click="onSelect">{ tag.name }</li>
 		</ul>
-		<ul class="selection">
+		<ul class="selection tags">
 			<li rv-each-tag="tags" rv-show="tag.selected"
 					rv-on-click="onDeselect">{ tag.name }</li>
 		</ul>

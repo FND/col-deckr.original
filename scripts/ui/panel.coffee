@@ -14,7 +14,7 @@ module.exports = class Panel
 		rivets.bind(@container, @)
 
 		if options.filterable
-			tags = Object.keys(deck.tags)
+			tags = Object.keys(deck.tags).sort()
 			@facetor = new Facetor(deck.index, tags)
 			@filter = new FilterSelector(tags, onChange: @onFilter)
 			util.prepend(@filter.container, @container) # XXX: belongs into template!?

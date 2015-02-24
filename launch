@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -e
+
+export PATH="./node_modules/.bin:$PATH"
+
+function restart_server {
+	terminate_server
+	start_server
+}
+
+function start_server {
+	./server &
+	echo $! > .server.pid
+}
+
+function terminate_server {
+	if [ -f .server.pid ]; then
+		kill `cat .server.pid` || true
+		rm .server.pid
+	fi
+}
+
+case "$1" in
+	start) # alias for restart to avoid confusion
+		restart_server
+		;;
+	stop)
+		terminate_server
+		;;
+	restart)
+		restart_server
+		;;
+	status)
+		echo "server PID: `cat .server.pid`"
+		;;
+	autocompile)
+		gulp autocompile
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|status|autocompile}"
+		exit 1
+esac
