@@ -3003,36 +3003,16 @@ module.exports = Facetor = (function() {
 
 
 },{}],"/Users/fnd/Dev/web/deckr/scripts/main.coffee":[function(require,module,exports){
-var Panel, Store, dummies, store;
+var Panel, Store, store;
 
 Panel = require("./ui/panel");
 
 Store = require("./store");
 
-dummies = [
-  {
-    title: "Half-Life",
-    tags: ["FPS", "scifi"]
-  }, {
-    title: "Unreal",
-    tags: ["FPS", "scifi"]
-  }, {
-    title: "Command & Conquer",
-    tags: ["RTS", "military", "scifi"]
-  }, {
-    title: "Portal",
-    tags: ["FPS", "puzzle", "scifi"]
-  }
-];
-
 store = new Store();
 
-store.load("/test/fixtures/store/").then(function(err) {
-  var browser, card, i, item, j, len, len1, rack, rackStore, selection, title;
-  for (i = 0, len = dummies.length; i < len; i++) {
-    item = dummies[i];
-    store.absorb(item);
-  }
+store.load("./test/fixtures/store/").then(function(store) {
+  var browser, card, i, item, len, rack, rackStore, selection, title;
   selection = (function() {
     var ref, results;
     ref = store.index;
@@ -3047,8 +3027,8 @@ store.load("/test/fixtures/store/").then(function(err) {
     return results;
   })();
   rackStore = new Store();
-  for (j = 0, len1 = selection.length; j < len1; j++) {
-    item = selection[j];
+  for (i = 0, len = selection.length; i < len; i++) {
+    item = selection[i];
     rackStore.absorb(item);
   }
   rack = new Panel(rackStore);
@@ -3398,38 +3378,26 @@ require("whatwg-fetch");
 xml = require("dav-dump/src/xml");
 
 exports.ls = function(uri) {
-  return fetch(uri, {
-    method: "PROPFIND",
-    headers: {
-      Depth: 1
-    }
-  }).then(function(res) {
-    return res.text();
-  }).then(function(txt) {
-    var doc, entries, list, lists, name, parser;
-    parser = new DOMParser();
-    doc = parser.parseFromString(txt, "text/xml");
-    lists = (function() {
-      var i, len, ref, results;
-      ref = xml.extractEntries(doc);
+  var prom;
+  prom = new Promise(function(resolve, reject) {
+    var id, ids, items, lists;
+    ids = ["b-1", "b-2", "eurofighter", "f-14", "f-15", "f-16", "f-22", "f-35", "harrier", "mig-25", "su-27"];
+    items = (function() {
+      var i, len, results;
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        list = ref[i];
-        entries = (function() {
-          var j, len1, results1;
-          results1 = [];
-          for (j = 0, len1 = list.length; j < len1; j++) {
-            name = list[j];
-            results1.push(name2entry(uri, name));
-          }
-          return results1;
-        })();
-        results.push(entries);
+      for (i = 0, len = ids.length; i < len; i++) {
+        id = ids[i];
+        results.push({
+          name: id,
+          uri: "./test/fixtures/store/" + id
+        });
       }
       return results;
     })();
-    return lists;
+    lists = [[], items];
+    return resolve(lists);
   });
+  return prom;
 };
 
 name2entry = function(root, name) {

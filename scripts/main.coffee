@@ -1,25 +1,9 @@
 Panel = require("./ui/panel")
 Store = require("./store")
 
-dummies = [{ # XXX: DEBUG
-	title: "Half-Life"
-	tags: ["FPS", "scifi"]
-}, {
-	title: "Unreal"
-	tags: ["FPS", "scifi"]
-}, {
-	title: "Command & Conquer"
-	tags: ["RTS", "military", "scifi"]
-}, {
-	title: "Portal"
-	tags: ["FPS", "puzzle", "scifi"]
-}]
-
 store = new Store()
-store.load("/test/fixtures/store/"). # XXX: DEBUG
-	then((err) ->
-		store.absorb(item) for item in dummies
-
+store.load("./test/fixtures/store/"). # XXX: DEBUG
+	then((store) ->
 		selection = for title, card of store.index
 			continue if Math.random() < 0.7
 			card

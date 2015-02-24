@@ -4,15 +4,13 @@ xml = require("dav-dump/src/xml")
 # returns a promise for a tuple of directories and files, with each entry being
 # a `{ name, uri }` object
 exports.ls = (uri) ->
-	return fetch(uri, method: "PROPFIND", headers: { Depth: 1 }).
-		then((res) -> res.text()).
-		then((txt) ->
-			parser = new DOMParser()
-			doc = parser.parseFromString(txt, "text/xml")
-			lists = for list in xml.extractEntries(doc)
-				entries = (name2entry(uri, name) for name in list)
-				entries
-			return lists)
+	prom = new Promise((resolve, reject) ->
+		ids = ["b-1", "b-2", "eurofighter", "f-14", "f-15", "f-16", "f-22",
+				"f-35", "harrier", "mig-25", "su-27"]
+		items = ({ name: id, uri: "./test/fixtures/store/#{id}" } for id in ids)
+		lists = [[], items]
+		resolve(lists))
+	return prom
 
 name2entry = (root, name) ->
 	root = root.replace(/\/$/, "")
