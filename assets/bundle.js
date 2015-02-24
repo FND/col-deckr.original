@@ -1,14 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/fnd/Dev/web/deckr/node_modules/dav-dump/src/xml.coffee":[function(require,module,exports){
 var parseEntry, traverse,
-  __slice = [].slice;
+  slice = [].slice;
 
 exports.extractEntries = function(doc) {
-  var dirs, entry, files, i, list, _i, _len, _ref;
+  var dirs, entry, files, i, j, len, list, ref;
   dirs = [];
   files = [];
-  _ref = doc.getElementsByTagNameNS("DAV:", "response");
-  for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-    entry = _ref[i];
+  ref = doc.getElementsByTagNameNS("DAV:", "response");
+  for (i = j = 0, len = ref.length; j < len; i = ++j) {
+    entry = ref[i];
     entry = parseEntry(entry);
     if (i === 0) {
       continue;
@@ -33,7 +33,7 @@ parseEntry = function(entry) {
 
 traverse = function() {
   var node, part, path, root;
-  root = arguments[0], path = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  root = arguments[0], path = 2 <= arguments.length ? slice.call(arguments, 1) : [];
   node = root;
   while (path.length) {
     part = path.shift();
@@ -1364,7 +1364,7 @@ traverse = function() {
     this.objectPath = []
     this.parse()
 
-    if(isObject(this.target = this.realize())) {
+    if (isObject(this.target = this.realize())) {
       this.set(true, this.key, this.target, this.callback)
     }
   }
@@ -1372,13 +1372,14 @@ traverse = function() {
   // Tokenizes the provided keypath string into interface + path tokens for the
   // observer to work with.
   Observer.tokenize = function(keypath, interfaces, root) {
-    tokens = []
-    current = {i: root, path: ''}
+    var tokens = []
+    var current = {i: root, path: ''}
+    var index, chr
 
     for (index = 0; index < keypath.length; index++) {
       chr = keypath.charAt(index)
 
-      if(!!~interfaces.indexOf(chr)) {
+      if (!!~interfaces.indexOf(chr)) {
         tokens.push(current)
         current = {i: chr, path: ''}
       } else {
@@ -1393,17 +1394,18 @@ traverse = function() {
   // Parses the keypath using the interfaces defined on the view. Sets variables
   // for the tokenized keypath as well as the end key.
   Observer.prototype.parse = function() {
-    interfaces = this.interfaces()
+    var interfaces = this.interfaces()
+    var root, path
 
-    if(!interfaces.length) {
+    if (!interfaces.length) {
       error('Must define at least one adapter interface.')
     }
 
-    if(!!~interfaces.indexOf(this.keypath[0])) {
+    if (!!~interfaces.indexOf(this.keypath[0])) {
       root = this.keypath[0]
       path = this.keypath.substr(1)
     } else {
-      if(typeof (root = this.options.root || sightglass.root) === 'undefined') {
+      if (typeof (root = this.options.root || sightglass.root) === 'undefined') {
         error('Must define a default root adapter.')
       }
 
@@ -1417,13 +1419,14 @@ traverse = function() {
   // Realizes the full keypath, attaching observers for every key and correcting
   // old observers to any changed objects in the keypath.
   Observer.prototype.realize = function() {
-    current = this.obj
-    unreached = false
+    var current = this.obj
+    var unreached = false
+    var prev
 
     this.tokens.forEach(function(token, index) {
-      if(isObject(current)) {
-        if(typeof this.objectPath[index] !== 'undefined') {
-          if(current !== (prev = this.objectPath[index])) {
+      if (isObject(current)) {
+        if (typeof this.objectPath[index] !== 'undefined') {
+          if (current !== (prev = this.objectPath[index])) {
             this.set(false, token, prev, this.update.bind(this))
             this.set(true, token, current, this.update.bind(this))
             this.objectPath[index] = current
@@ -1435,15 +1438,17 @@ traverse = function() {
 
         current = this.get(token, current)
       } else {
-        if(unreached === false) unreached = index
+        if (unreached === false) {
+          unreached = index
+        }
 
-        if(prev = this.objectPath[index]) {
+        if (prev = this.objectPath[index]) {
           this.set(false, token, prev, this.update.bind(this))
         }
       }
     }, this)
 
-    if(unreached !== false) {
+    if (unreached !== false) {
       this.objectPath.splice(unreached)
     }
 
@@ -1452,26 +1457,28 @@ traverse = function() {
 
   // Updates the keypath. This is called when any intermediary key is changed.
   Observer.prototype.update = function() {
-    if((next = this.realize()) !== this.target) {
-      if(isObject(this.target)) {
+    var next, oldValue
+
+    if ((next = this.realize()) !== this.target) {
+      if (isObject(this.target)) {
         this.set(false, this.key, this.target, this.callback)
       }
 
-      if(isObject(next)) {
+      if (isObject(next)) {
         this.set(true, this.key, next, this.callback)
       }
 
       oldValue = this.value()
       this.target = next
 
-      if(this.value() !== oldValue) this.callback()
+      if (this.value() !== oldValue) this.callback()
     }
   }
 
   // Reads the current end value of the observed keypath. Returns undefined if
   // the full keypath is unreachable.
   Observer.prototype.value = function() {
-    if(isObject(this.target)) {
+    if (isObject(this.target)) {
       return this.get(this.key, this.target)
     }
   }
@@ -1479,7 +1486,7 @@ traverse = function() {
   // Sets the current end value of the observed keypath. Calling setValue when
   // the full keypath is unreachable is a no-op.
   Observer.prototype.setValue = function(value) {
-    if(isObject(this.target)) {
+    if (isObject(this.target)) {
       this.adapter(this.key).set(this.target, this.key.path, value)
     }
   }
@@ -1491,16 +1498,16 @@ traverse = function() {
 
   // Observes or unobserves a callback on the object using the provided key.
   Observer.prototype.set = function(active, key, obj, callback) {
-    action = active ? 'observe' : 'unobserve'
+    var action = active ? 'observe' : 'unobserve'
     this.adapter(key)[action](obj, key.path, callback)
   }
 
   // Returns an array of all unique adapter interfaces available.
   Observer.prototype.interfaces = function() {
-    interfaces = Object.keys(this.options.adapters)
+    var interfaces = Object.keys(this.options.adapters)
 
     Object.keys(sightglass.adapters).forEach(function(i) {
-      if(!~interfaces.indexOf(i)) {
+      if (!~interfaces.indexOf(i)) {
         interfaces.push(i)
       }
     })
@@ -1516,13 +1523,15 @@ traverse = function() {
 
   // Unobserves the entire keypath.
   Observer.prototype.unobserve = function() {
+    var obj
+
     this.tokens.forEach(function(token, index) {
-      if(obj = this.objectPath[index]) {
+      if (obj = this.objectPath[index]) {
         this.set(false, token, obj, this.update.bind(this))
       }
     }, this)
 
-    if(isObject(this.target)) {
+    if (isObject(this.target)) {
       this.set(false, this.key, this.target, this.callback)
     }
   }
@@ -1538,7 +1547,7 @@ traverse = function() {
   }
 
   // Export module for Node and the browser.
-  if(typeof module !== 'undefined' && module.exports) {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = sightglass
   } else if (typeof define === 'function' && define.amd) {
     define([], function() {
@@ -1547,7 +1556,7 @@ traverse = function() {
   } else {
     this.sightglass = sightglass
   }
-}).call(this)
+}).call(this);
 
 },{}],"/Users/fnd/Dev/web/deckr/node_modules/sortablejs/Sortable.js":[function(require,module,exports){
 /**!
@@ -1577,15 +1586,19 @@ traverse = function() {
 	"use strict";
 
 	var dragEl,
-		startIndex,
 		ghostEl,
 		cloneEl,
 		rootEl,
-		scrollEl,
 		nextEl,
+
+		scrollEl,
+		scrollParentEl,
 
 		lastEl,
 		lastCSS,
+
+		oldIndex,
+		newIndex,
 
 		activeGroup,
 		autoScroll = {},
@@ -1598,7 +1611,9 @@ traverse = function() {
 		win = window,
 		document = win.document,
 		parseInt = win.parseInt,
-		supportIEdnd = !!document.createElement('div').dragDrop,
+
+		supportDraggable = !!('draggable' in document.createElement('div')),
+
 
 		_silent = false,
 
@@ -1609,6 +1624,7 @@ traverse = function() {
 
 			evt.item = targetEl || rootEl;
 			evt.from = fromEl || rootEl;
+			evt.clone = cloneEl;
 
 			evt.oldIndex = startIndex;
 			evt.newIndex = newIndex;
@@ -1623,7 +1639,82 @@ traverse = function() {
 		abs = Math.abs,
 		slice = [].slice,
 
-		touchDragOverListeners = []
+		touchDragOverListeners = [],
+
+		_autoScroll = _throttle(function (/**Event*/evt, /**Object*/options, /**HTMLElement*/rootEl) {
+			// Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=505521
+			if (rootEl && options.scroll) {
+				var el,
+					rect,
+					sens = options.scrollSensitivity,
+					speed = options.scrollSpeed,
+
+					x = evt.clientX,
+					y = evt.clientY,
+
+					winWidth = window.innerWidth,
+					winHeight = window.innerHeight,
+
+					vx,
+					vy
+				;
+
+				// Delect scrollEl
+				if (scrollParentEl !== rootEl) {
+					scrollEl = options.scroll;
+					scrollParentEl = rootEl;
+
+					if (scrollEl === true) {
+						scrollEl = rootEl;
+
+						do {
+							if ((scrollEl.offsetWidth < scrollEl.scrollWidth) ||
+								(scrollEl.offsetHeight < scrollEl.scrollHeight)
+							) {
+								break;
+							}
+							/* jshint boss:true */
+						} while (scrollEl = scrollEl.parentNode);
+					}
+				}
+
+				if (scrollEl) {
+					el = scrollEl;
+					rect = scrollEl.getBoundingClientRect();
+					vx = (abs(rect.right - x) <= sens) - (abs(rect.left - x) <= sens);
+					vy = (abs(rect.bottom - y) <= sens) - (abs(rect.top - y) <= sens);
+				}
+
+
+				if (!(vx || vy)) {
+					vx = (winWidth - x <= sens) - (x <= sens);
+					vy = (winHeight - y <= sens) - (y <= sens);
+
+					/* jshint expr:true */
+					(vx || vy) && (el = win);
+				}
+
+
+				if (autoScroll.vx !== vx || autoScroll.vy !== vy || autoScroll.el !== el) {
+					autoScroll.el = el;
+					autoScroll.vx = vx;
+					autoScroll.vy = vy;
+
+					clearInterval(autoScroll.pid);
+
+					if (el) {
+						autoScroll.pid = setInterval(function () {
+							if (el === win) {
+								win.scrollTo(win.scrollX + vx * speed, win.scrollY + vy * speed);
+							} else {
+								vy && (el.scrollTop += vy * speed);
+								vx && (el.scrollLeft += vx * speed);
+							}
+						}, 24);
+					}
+				}
+			}
+		}, 30)
 	;
 
 
@@ -1655,7 +1746,9 @@ traverse = function() {
 			animation: 0,
 			setData: function (dataTransfer, dragEl) {
 				dataTransfer.setData('Text', dragEl.textContent);
-			}
+			},
+			dropBubble: false,
+			dragoverBubble: false
 		};
 
 
@@ -1686,8 +1779,9 @@ traverse = function() {
 		}, this);
 
 
-		// Export group name
-		el[expando] = group.name + ' ' + (group.put.join ? group.put.join(' ') : '');
+		// Export options
+		options.groups = ' ' + group.name + (group.put.join ? ' ' + group.put.join(' ') : '') + ' ';
+		el[expando] = options;
 
 
 		// Bind all private methods
@@ -1701,10 +1795,9 @@ traverse = function() {
 		// Bind events
 		_on(el, 'mousedown', this._onTapStart);
 		_on(el, 'touchstart', this._onTapStart);
-		supportIEdnd && _on(el, 'selectstart', this._onTapStart);
 
-		_on(el, 'dragover', this._onDragOver);
-		_on(el, 'dragenter', this._onDragOver);
+		_on(el, 'dragover', this);
+		_on(el, 'dragenter', this);
 
 		touchDragOverListeners.push(this._onDragOver);
 
@@ -1718,13 +1811,15 @@ traverse = function() {
 
 
 		_dragStarted: function () {
-			// Apply effect
-			_toggleClass(dragEl, this.options.ghostClass, true);
+			if (rootEl && dragEl) {
+				// Apply effect
+				_toggleClass(dragEl, this.options.ghostClass, true);
 
-			Sortable.active = this;
+				Sortable.active = this;
 
-			// Drag start event
-			_dispatchEvent(rootEl, 'start', dragEl, rootEl, startIndex);
+				// Drag start event
+				_dispatchEvent(rootEl, 'start', dragEl, rootEl, oldIndex);
+			}
 		},
 
 
@@ -1741,19 +1836,19 @@ traverse = function() {
 				return; // only left button or enabled
 			}
 
-			if (options.handle) {
-				target = _closest(target, options.handle, el);
-			}
-
 			target = _closest(target, options.draggable, el);
 
+			if (!target) {
+				return;
+			}
+
 			// get the index of the dragged element within its parent
-			startIndex = _index(target);
+			oldIndex = _index(target);
 
 			// Check filter
 			if (typeof filter === 'function') {
 				if (filter.call(this, evt, target, this)) {
-					_dispatchEvent(originalTarget, 'filter', target, el, startIndex);
+					_dispatchEvent(originalTarget, 'filter', target, el, oldIndex);
 					evt.preventDefault();
 					return; // cancel dnd
 				}
@@ -1763,7 +1858,7 @@ traverse = function() {
 					criteria = _closest(originalTarget, criteria.trim(), el);
 
 					if (criteria) {
-						_dispatchEvent(criteria, 'filter', target, el, startIndex);
+						_dispatchEvent(criteria, 'filter', target, el, oldIndex);
 						return true;
 					}
 				});
@@ -1774,11 +1869,14 @@ traverse = function() {
 				}
 			}
 
+
+			if (options.handle && !_closest(originalTarget, options.handle, el)) {
+				return;
+			}
+
+
 			// Prepare `dragstart`
 			if (target && !dragEl && (target.parentNode === el)) {
-				// IE 9 Support
-				(type === 'selectstart') && target.dragDrop();
-
 				tapEvt = evt;
 
 				rootEl = this.el;
@@ -1801,7 +1899,7 @@ traverse = function() {
 						clientY: touch.clientY
 					};
 
-					this._onDragStart(tapEvt, true);
+					this._onDragStart(tapEvt, 'touch');
 					evt.preventDefault();
 				}
 
@@ -1812,8 +1910,9 @@ traverse = function() {
 				_on(dragEl, 'dragend', this);
 				_on(rootEl, 'dragstart', this._onDragStart);
 
-				_on(document, 'dragover', this);
-
+				if (!supportDraggable) {
+					this._onDragStart(tapEvt, true);
+				}
 
 				try {
 					if (document.selection) {
@@ -1822,13 +1921,6 @@ traverse = function() {
 						window.getSelection().removeAllRanges();
 					}
 				} catch (err) {
-				}
-
-
-				if (activeGroup.pull == 'clone') {
-					cloneEl = dragEl.cloneNode(true);
-					_css(cloneEl, 'display', 'none');
-					rootEl.insertBefore(cloneEl, dragEl);
 				}
 			}
 		},
@@ -1839,12 +1931,12 @@ traverse = function() {
 
 				var target = document.elementFromPoint(touchEvt.clientX, touchEvt.clientY),
 					parent = target,
-					groupName = this.options.group.name,
+					groupName = ' ' + this.options.group.name + '',
 					i = touchDragOverListeners.length;
 
 				if (parent) {
 					do {
-						if ((' ' + parent[expando] + ' ').indexOf(groupName) > -1) {
+						if (parent[expando] && parent[expando].groups.indexOf(groupName) > -1) {
 							while (i--) {
 								touchDragOverListeners[i]({
 									clientX: touchEvt.clientX,
@@ -1870,10 +1962,10 @@ traverse = function() {
 
 		_onTouchMove: function (/**TouchEvent*/evt) {
 			if (tapEvt) {
-				var touch = evt.touches[0],
+				var touch = evt.touches ? evt.touches[0] : evt,
 					dx = touch.clientX - tapEvt.clientX,
 					dy = touch.clientY - tapEvt.clientY,
-					translate3d = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
+					translate3d = evt.touches ? 'translate3d(' + dx + 'px,' + dy + 'px,0)' : 'translate(' + dx + 'px,' + dy + 'px)';
 
 				touchEvt = touch;
 
@@ -1882,19 +1974,24 @@ traverse = function() {
 				_css(ghostEl, 'msTransform', translate3d);
 				_css(ghostEl, 'transform', translate3d);
 
-				this._onDrag(touch);
 				evt.preventDefault();
 			}
 		},
 
 
-		_onDragStart: function (/**Event*/evt, /**boolean*/isTouch) {
+		_onDragStart: function (/**Event*/evt, /**boolean*/useFallback) {
 			var dataTransfer = evt.dataTransfer,
 				options = this.options;
 
 			this._offUpEvents();
 
-			if (isTouch) {
+			if (activeGroup.pull == 'clone') {
+				cloneEl = dragEl.cloneNode(true);
+				_css(cloneEl, 'display', 'none');
+				rootEl.insertBefore(cloneEl, dragEl);
+			}
+
+			if (useFallback) {
 				var rect = dragEl.getBoundingClientRect(),
 					css = _css(dragEl),
 					ghostRect;
@@ -1916,88 +2013,30 @@ traverse = function() {
 				_css(ghostEl, 'width', rect.width * 2 - ghostRect.width);
 				_css(ghostEl, 'height', rect.height * 2 - ghostRect.height);
 
-				// Bind touch events
-				_on(document, 'touchmove', this._onTouchMove);
-				_on(document, 'touchend', this._onDrop);
-				_on(document, 'touchcancel', this._onDrop);
+				if (useFallback === 'touch') {
+					// Bind touch events
+					_on(document, 'touchmove', this._onTouchMove);
+					_on(document, 'touchend', this._onDrop);
+					_on(document, 'touchcancel', this._onDrop);
+				} else {
+					// Old brwoser
+					_on(document, 'mousemove', this._onTouchMove);
+					_on(document, 'mouseup', this._onDrop);
+				}
 
 				this._loopId = setInterval(this._emulateDragOver, 150);
 			}
 			else {
-				dataTransfer.effectAllowed = 'move';
-				options.setData && options.setData.call(this, dataTransfer, dragEl);
+				if (dataTransfer) {
+					dataTransfer.effectAllowed = 'move';
+					options.setData && options.setData.call(this, dataTransfer, dragEl);
+				}
 
 				_on(document, 'drop', this);
 			}
 
-			scrollEl = options.scroll;
-
-			if (scrollEl === true) {
-				scrollEl = rootEl;
-
-				do {
-					if ((scrollEl.offsetWidth < scrollEl.scrollWidth) ||
-						(scrollEl.offsetHeight < scrollEl.scrollHeight)
-					) {
-						break;
-					}
-				/* jshint boss:true */
-				} while (scrollEl = scrollEl.parentNode);
-			}
-
 			setTimeout(this._dragStarted, 0);
 		},
-
-		_onDrag: _throttle(function (/**Event*/evt) {
-			// Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=505521
-			if (rootEl && this.options.scroll) {
-				var el,
-					rect,
-					options = this.options,
-					sens = options.scrollSensitivity,
-					speed = options.scrollSpeed,
-
-					x = evt.clientX,
-					y = evt.clientY,
-
-					winWidth = window.innerWidth,
-					winHeight = window.innerHeight,
-
-					vx = (winWidth - x <= sens) - (x <= sens),
-					vy = (winHeight - y <= sens) - (y <= sens)
-				;
-
-				if (vx || vy) {
-					el = win;
-				}
-				else if (scrollEl) {
-					el = scrollEl;
-					rect = scrollEl.getBoundingClientRect();
-					vx = (abs(rect.right - x) <= sens) - (abs(rect.left - x) <= sens);
-					vy = (abs(rect.bottom - y) <= sens) - (abs(rect.top - y) <= sens);
-				}
-
-				if (autoScroll.vx !== vx || autoScroll.vy !== vy || autoScroll.el !== el) {
-					autoScroll.el = el;
-					autoScroll.vx = vx;
-					autoScroll.vy = vy;
-
-					clearInterval(autoScroll.pid);
-
-					if (el) {
-						autoScroll.pid = setInterval(function () {
-							if (el === win) {
-								win.scrollTo(win.scrollX + vx * speed, win.scrollY + vy * speed);
-							} else {
-								vy && (el.scrollTop += vy * speed);
-								vx && (el.scrollLeft += vx * speed);
-							}
-						}, 24);
-					}
-				}
-			}
-		}, 30),
-
 
 		_onDragOver: function (/**Event*/evt) {
 			var el = this.el,
@@ -2010,12 +2049,16 @@ traverse = function() {
 				isOwner = (activeGroup === group),
 				canSort = options.sort;
 
-			if (evt.preventDefault !== void 0) {
-				evt.preventDefault();
-				evt.stopPropagation();
+			if (!dragEl) {
+				return;
 			}
 
-			if (!_silent && activeGroup &&
+			if (evt.preventDefault !== void 0) {
+				evt.preventDefault();
+				!options.dragoverBubble && evt.stopPropagation();
+			}
+
+			if (activeGroup && !options.disabled &&
 				(isOwner
 					? canSort || (revert = !rootEl.contains(dragEl))
 					: activeGroup.pull && groupPut && (
@@ -2025,6 +2068,13 @@ traverse = function() {
 				) &&
 				(evt.rootEl === void 0 || evt.rootEl === this.el)
 			) {
+				// Smart auto-scrolling
+				_autoScroll(evt, options, this.el);
+
+				if (_silent) {
+					return;
+				}
+
 				target = _closest(evt.target, options.draggable, el);
 				dragRect = dragEl.getBoundingClientRect();
 
@@ -2120,6 +2170,7 @@ traverse = function() {
 				clearTimeout(target.animated);
 				target.animated = setTimeout(function () {
 					_css(target, 'transition', '');
+					_css(target, 'transform', '');
 					target.animated = false;
 				}, ms);
 			}
@@ -2133,63 +2184,71 @@ traverse = function() {
 		},
 
 		_onDrop: function (/**Event*/evt) {
-			var el = this.el;
+			var el = this.el,
+				options = this.options;
 
 			clearInterval(this._loopId);
 			clearInterval(autoScroll.pid);
 
 			// Unbind events
 			_off(document, 'drop', this);
-			_off(document, 'dragover', this);
-
+			_off(document, 'mousemove', this._onTouchMove);
 			_off(el, 'dragstart', this._onDragStart);
 
 			this._offUpEvents();
 
 			if (evt) {
 				evt.preventDefault();
-				evt.stopPropagation();
+				!options.dropBubble && evt.stopPropagation();
 
 				ghostEl && ghostEl.parentNode.removeChild(ghostEl);
 
 				if (dragEl) {
 					_off(dragEl, 'dragend', this);
 
-					// get the index of the dragged element within its parent
-					var newIndex = _index(dragEl);
-
 					_disableDraggable(dragEl);
 					_toggleClass(dragEl, this.options.ghostClass, false);
 
 					if (rootEl !== dragEl.parentNode) {
+						newIndex = _index(dragEl);
+
 						// drag from one list and drop into another
-						_dispatchEvent(dragEl.parentNode, 'sort', dragEl, rootEl, startIndex, newIndex);
-						_dispatchEvent(rootEl, 'sort', dragEl, rootEl, startIndex, newIndex);
+						_dispatchEvent(dragEl.parentNode, 'sort', dragEl, rootEl, oldIndex, newIndex);
+						_dispatchEvent(rootEl, 'sort', dragEl, rootEl, oldIndex, newIndex);
 
 						// Add event
-						_dispatchEvent(dragEl, 'add', dragEl, rootEl, startIndex, newIndex);
+						_dispatchEvent(dragEl, 'add', dragEl, rootEl, oldIndex, newIndex);
 
 						// Remove event
-						_dispatchEvent(rootEl, 'remove', dragEl, rootEl, startIndex, newIndex);
+						_dispatchEvent(rootEl, 'remove', dragEl, rootEl, oldIndex, newIndex);
 					}
-					else if (dragEl.nextSibling !== nextEl) {
-						// drag & drop within the same list
-						_dispatchEvent(rootEl, 'update', dragEl, rootEl, startIndex, newIndex);
-						_dispatchEvent(rootEl, 'sort', dragEl, rootEl, startIndex, newIndex);
-
+					else {
+						// Remove clone
 						cloneEl && cloneEl.parentNode.removeChild(cloneEl);
+
+						if (dragEl.nextSibling !== nextEl) {
+							// Get the index of the dragged element within its parent
+							newIndex = _index(dragEl);
+
+							// drag & drop within the same list
+							_dispatchEvent(rootEl, 'update', dragEl, rootEl, oldIndex, newIndex);
+							_dispatchEvent(rootEl, 'sort', dragEl, rootEl, oldIndex, newIndex);
+						}
 					}
 
 					// Drag end event
-					Sortable.active && _dispatchEvent(rootEl, 'end', dragEl, rootEl, startIndex, newIndex);
+					Sortable.active && _dispatchEvent(rootEl, 'end', dragEl, rootEl, oldIndex, newIndex);
 				}
 
-				// Set NULL
+				// Nulling
 				rootEl =
 				dragEl =
 				ghostEl =
 				nextEl =
 				cloneEl =
+
+				scrollEl =
+				scrollParentEl =
 
 				tapEvt =
 				touchEvt =
@@ -2209,8 +2268,8 @@ traverse = function() {
 		handleEvent: function (/**Event*/evt) {
 			var type = evt.type;
 
-			if (type === 'dragover') {
-				this._onDrag(evt);
+			if (type === 'dragover' || type === 'dragenter') {
+				this._onDragOver(evt);
 				_globalDragOver(evt);
 			}
 			else if (type === 'drop' || type === 'dragend') {
@@ -2314,10 +2373,9 @@ traverse = function() {
 
 			_off(el, 'mousedown', this._onTapStart);
 			_off(el, 'touchstart', this._onTapStart);
-			_off(el, 'selectstart', this._onTapStart);
 
-			_off(el, 'dragover', this._onDragOver);
-			_off(el, 'dragenter', this._onDragOver);
+			_off(el, 'dragover', this);
+			_off(el, 'dragenter', this);
 
 			//remove draggable attributes
 			Array.prototype.forEach.call(el.querySelectorAll('[draggable]'), function (el) {
@@ -2361,7 +2419,7 @@ traverse = function() {
 			do {
 				if (
 					(tag === '>*' && el.parentNode === ctx) || (
-						(tag === '' || el.nodeName == tag) &&
+						(tag === '' || el.nodeName.toUpperCase() == tag) &&
 						(!selector.length || ((' ' + el.className + ' ').match(re) || []).length == selector.length)
 					)
 				) {
@@ -2489,8 +2547,10 @@ traverse = function() {
 	 */
 	function _index(/**HTMLElement*/el) {
 		var index = 0;
-		while (el && (el = el.previousElementSibling) && (el.nodeName !== 'TEMPLATE')) {
-			index++;
+		while (el && (el = el.previousElementSibling)) {
+			if (el.nodeName.toUpperCase() !== 'TEMPLATE') {
+				index++;
+			}
 		}
 		return index;
 	}
@@ -2535,7 +2595,7 @@ traverse = function() {
 	};
 
 
-	Sortable.version = '1.0.0';
+	Sortable.version = '1.1.1';
 
 
 	/**
@@ -2879,12 +2939,12 @@ traverse = function() {
 
 },{}],"/Users/fnd/Dev/web/deckr/scripts/facetor.coffee":[function(require,module,exports){
 var Facetor,
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 module.exports = Facetor = (function() {
-  function Facetor(_at_index, _at_originalTags) {
-    this.index = _at_index;
-    this.originalTags = _at_originalTags != null ? _at_originalTags : [];
+  function Facetor(index, originalTags) {
+    this.index = index;
+    this.originalTags = originalTags != null ? originalTags : [];
     this.init();
   }
 
@@ -2895,22 +2955,22 @@ module.exports = Facetor = (function() {
   };
 
   Facetor.prototype.filter = function(tag) {
-    var item, tags, tg, title, titles, _i, _j, _len, _len1, _ref, _ref1;
+    var i, item, j, len, len1, ref, ref1, tags, tg, title, titles;
     if (this.selection[tag]) {
       return;
     }
     titles = [];
     tags = {};
-    _ref = this.titles;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      title = _ref[_i];
+    ref = this.titles;
+    for (i = 0, len = ref.length; i < len; i++) {
+      title = ref[i];
       item = this.index[title];
-      if (__indexOf.call(item.tags, tag) >= 0) {
+      if (indexOf.call(item.tags, tag) >= 0) {
         titles.push(title);
-        _ref1 = item.tags;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          tg = _ref1[_j];
-          if (__indexOf.call(this.tags, tg) >= 0) {
+        ref1 = item.tags;
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          tg = ref1[j];
+          if (indexOf.call(this.tags, tg) >= 0) {
             tags[tg] = true;
           }
         }
@@ -2923,15 +2983,15 @@ module.exports = Facetor = (function() {
   };
 
   Facetor.prototype.defilter = function(tag) {
-    var selection, _i, _len;
+    var i, len, selection;
     if (!this.selection[tag]) {
       return;
     }
     delete this.selection[tag];
     selection = Object.keys(this.selection);
     this.init();
-    for (_i = 0, _len = selection.length; _i < _len; _i++) {
-      tag = selection[_i];
+    for (i = 0, len = selection.length; i < len; i++) {
+      tag = selection[i];
       this.filter(tag);
     }
   };
@@ -2968,27 +3028,27 @@ dummies = [
 store = new Store();
 
 store.load("/test/fixtures/store/").then(function(err) {
-  var browser, card, item, rack, rackStore, selection, title, _i, _j, _len, _len1;
-  for (_i = 0, _len = dummies.length; _i < _len; _i++) {
-    item = dummies[_i];
+  var browser, card, i, item, j, len, len1, rack, rackStore, selection, title;
+  for (i = 0, len = dummies.length; i < len; i++) {
+    item = dummies[i];
     store.absorb(item);
   }
   selection = (function() {
-    var _ref, _results;
-    _ref = store.index;
-    _results = [];
-    for (title in _ref) {
-      card = _ref[title];
+    var ref, results;
+    ref = store.index;
+    results = [];
+    for (title in ref) {
+      card = ref[title];
       if (Math.random() < 0.7) {
         continue;
       }
-      _results.push(card);
+      results.push(card);
     }
-    return _results;
+    return results;
   })();
   rackStore = new Store();
-  for (_j = 0, _len1 = selection.length; _j < _len1; _j++) {
-    item = selection[_j];
+  for (j = 0, len1 = selection.length; j < len1; j++) {
+    item = selection[j];
     rackStore.absorb(item);
   }
   rack = new Panel(rackStore);
@@ -3019,9 +3079,9 @@ module.exports = Store = (function() {
   Store.prototype.load = function(src) {
     return this.retrieve(src).then((function(_this) {
       return function(cards) {
-        var data, _i, _len;
-        for (_i = 0, _len = cards.length; _i < _len; _i++) {
-          data = cards[_i];
+        var data, i, len;
+        for (i = 0, len = cards.length; i < len; i++) {
+          data = cards[i];
           _this.absorb(data);
         }
         return _this;
@@ -3030,33 +3090,33 @@ module.exports = Store = (function() {
   };
 
   Store.prototype.absorb = function(item) {
-    var card, tag, title, _base, _i, _len, _ref;
+    var base, card, i, len, ref, tag, title;
     card = new Card(item.title, item.tags, item.body);
     title = card.title;
     if (this.index[title]) {
       util.error("duplicate title", title);
     }
     this.index[title] = card;
-    _ref = card.tags;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      tag = _ref[_i];
-      (_base = this.tags)[tag] || (_base[tag] = []);
+    ref = card.tags;
+    for (i = 0, len = ref.length; i < len; i++) {
+      tag = ref[i];
+      (base = this.tags)[tag] || (base[tag] = []);
       this.tags[tag].push(card);
     }
   };
 
   Store.prototype.retrieve = function(index) {
-    return webdav.ls(index).then(function(_arg) {
+    return webdav.ls(index).then(function(arg) {
       var dirs, file, files, items;
-      dirs = _arg[0], files = _arg[1];
+      dirs = arg[0], files = arg[1];
       items = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = files.length; _i < _len; _i++) {
-          file = files[_i];
-          _results.push(resolve(file));
+        var i, len, results;
+        results = [];
+        for (i = 0, len = files.length; i < len; i++) {
+          file = files[i];
+          results.push(resolve(file));
         }
-        return _results;
+        return results;
       })();
       return Promise.all(items);
     });
@@ -3067,10 +3127,10 @@ module.exports = Store = (function() {
 })();
 
 Card = (function() {
-  function Card(_at_title, _at_tags, _at_body) {
-    this.title = _at_title;
-    this.tags = _at_tags != null ? _at_tags : [];
-    this.body = _at_body;
+  function Card(title1, tags1, body1) {
+    this.title = title1;
+    this.tags = tags1 != null ? tags1 : [];
+    this.body = body1;
   }
 
   return Card;
@@ -3108,8 +3168,8 @@ download = function(uri) {
 
 },{"./util":"/Users/fnd/Dev/web/deckr/scripts/util.coffee","./webdav":"/Users/fnd/Dev/web/deckr/scripts/webdav.coffee","whatwg-fetch":"/Users/fnd/Dev/web/deckr/node_modules/whatwg-fetch/fetch.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/filter_selector.coffee":[function(require,module,exports){
 var FilterSelector, Tag, rivets, util,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 rivets = require("rivets");
 
@@ -3121,16 +3181,16 @@ module.exports = FilterSelector = (function() {
     if (options == null) {
       options = {};
     }
-    this.onDeselect = __bind(this.onDeselect, this);
-    this.onSelect = __bind(this.onSelect, this);
+    this.onDeselect = bind(this.onDeselect, this);
+    this.onSelect = bind(this.onSelect, this);
     this.tags = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = tags.length; _i < _len; _i++) {
-        tag = tags[_i];
-        _results.push(new Tag(tag));
+      var i, len, results;
+      results = [];
+      for (i = 0, len = tags.length; i < len; i++) {
+        tag = tags[i];
+        results.push(new Tag(tag));
       }
-      return _results;
+      return results;
     })();
     this.onChange = options.onChange;
     this.container = util.getTemplate("filter-selector");
@@ -3146,11 +3206,11 @@ module.exports = FilterSelector = (function() {
   };
 
   FilterSelector.prototype.setCandidates = function(tagNames) {
-    var tag, _i, _len, _ref, _ref1;
-    _ref = this.tags;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      tag = _ref[_i];
-      tag.set("disabled", (_ref1 = tag.name, __indexOf.call(tagNames, _ref1) < 0));
+    var i, len, ref, ref1, tag;
+    ref = this.tags;
+    for (i = 0, len = ref.length; i < len; i++) {
+      tag = ref[i];
+      tag.set("disabled", (ref1 = tag.name, indexOf.call(tagNames, ref1) < 0));
     }
   };
 
@@ -3168,10 +3228,10 @@ module.exports = FilterSelector = (function() {
 })();
 
 Tag = (function() {
-  function Tag(_at_name, _at_selected, _at_disabled) {
-    this.name = _at_name;
-    this.selected = _at_selected;
-    this.disabled = _at_disabled;
+  function Tag(name, selected1, disabled) {
+    this.name = name;
+    this.selected = selected1;
+    this.disabled = disabled;
     this.set();
   }
 
@@ -3190,8 +3250,8 @@ Tag = (function() {
 
 },{"./util":"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee","rivets":"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/panel.coffee":[function(require,module,exports){
 var Card, Facetor, FilterSelector, Panel, rivets, sortable, util,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 rivets = require("rivets");
 
@@ -3209,22 +3269,22 @@ module.exports = Panel = (function() {
     if (options == null) {
       options = {};
     }
-    this.onFilter = __bind(this.onFilter, this);
+    this.onFilter = bind(this.onFilter, this);
     this.cards = (function() {
-      var _ref, _results;
-      _ref = deck.index;
-      _results = [];
-      for (title in _ref) {
-        card = _ref[title];
-        _results.push(new Card(card.title, card.tags));
+      var ref, results;
+      ref = deck.index;
+      results = [];
+      for (title in ref) {
+        card = ref[title];
+        results.push(new Card(card.title, card.tags));
       }
-      return _results;
+      return results;
     })();
     this.container = util.getTemplate("panel");
     list = this.container.querySelector(".deck");
     rivets.bind(this.container, this);
     if (options.filterable) {
-      tags = Object.keys(deck.tags);
+      tags = Object.keys(deck.tags).sort();
       this.facetor = new Facetor(deck.index, tags);
       this.filter = new FilterSelector(tags, {
         onChange: this.onFilter
@@ -3235,20 +3295,20 @@ module.exports = Panel = (function() {
   }
 
   Panel.prototype.onFilter = function(status, tag) {
-    var card, _i, _len, _ref, _ref1, _results;
+    var card, i, len, ref, ref1, results;
     if (status === "added") {
       this.facetor.filter(tag);
     } else {
       this.facetor.defilter(tag);
     }
     this.filter.setCandidates(this.facetor.tags);
-    _ref = this.cards;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      card = _ref[_i];
-      _results.push(card.disabled = (_ref1 = card.title, __indexOf.call(this.facetor.titles, _ref1) < 0));
+    ref = this.cards;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      card = ref[i];
+      results.push(card.disabled = (ref1 = card.title, indexOf.call(this.facetor.titles, ref1) < 0));
     }
-    return _results;
+    return results;
   };
 
   return Panel;
@@ -3256,10 +3316,10 @@ module.exports = Panel = (function() {
 })();
 
 Card = (function() {
-  function Card(_at_title, _at_tags, _at_disabled) {
-    this.title = _at_title;
-    this.tags = _at_tags;
-    this.disabled = _at_disabled;
+  function Card(title1, tags1, disabled) {
+    this.title = title1;
+    this.tags = tags1;
+    this.disabled = disabled;
   }
 
   return Card;
@@ -3312,18 +3372,18 @@ exports.prepend = function(node, parent) {
 
 },{}],"/Users/fnd/Dev/web/deckr/scripts/util.coffee":[function(require,module,exports){
 (function (global){
-var __slice = [].slice;
+var slice = [].slice;
 
 exports.error = function() {
   var args, msg;
-  msg = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  msg = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
   if (!global.console) {
     return;
   }
   if (console.error) {
-    console.error.apply(console, [msg].concat(__slice.call(args)));
+    console.error.apply(console, [msg].concat(slice.call(args)));
   } else {
-    console.log.apply(console, [msg].concat(__slice.call(args)));
+    console.log.apply(console, [msg].concat(slice.call(args)));
   }
 };
 
@@ -3350,23 +3410,23 @@ exports.ls = function(uri) {
     parser = new DOMParser();
     doc = parser.parseFromString(txt, "text/xml");
     lists = (function() {
-      var _i, _len, _ref, _results;
-      _ref = xml.extractEntries(doc);
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        list = _ref[_i];
+      var i, len, ref, results;
+      ref = xml.extractEntries(doc);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        list = ref[i];
         entries = (function() {
-          var _j, _len1, _results1;
-          _results1 = [];
-          for (_j = 0, _len1 = list.length; _j < _len1; _j++) {
-            name = list[_j];
-            _results1.push(name2entry(uri, name));
+          var j, len1, results1;
+          results1 = [];
+          for (j = 0, len1 = list.length; j < len1; j++) {
+            name = list[j];
+            results1.push(name2entry(uri, name));
           }
-          return _results1;
+          return results1;
         })();
-        _results.push(entries);
+        results.push(entries);
       }
-      return _results;
+      return results;
     })();
     return lists;
   });

@@ -25,6 +25,40 @@
     float: left;
     margin-right: 0.5em; }
 
+.tags {
+  padding-left: 0; }
+
+.tags > li {
+  position: relative;
+  display: inline-block;
+  height: 2em;
+  margin-left: 2em;
+  margin-bottom: 1em;
+  padding-left: 1em;
+  padding-right: 0.5em;
+  line-height: 2em;
+  text-align: right;
+  background-color: #EEE; }
+  .tags > li:before {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    height: 0;
+    width: 0;
+    margin-left: -3em;
+    border: 1em solid white;
+    border-right-color: #EEE; }
+  .tags > li:after {
+    content: "";
+    position: absolute;
+    top: 0.75em;
+    left: -0.25em;
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 1em;
+    background-color: #FFF;
+    box-shadow: 0 -1px 1px 0 rgba(0, 0, 0, 0.3); }
+
 body {
   width: 80%;
   margin: 1em auto; }
