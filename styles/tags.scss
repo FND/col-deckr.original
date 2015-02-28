@@ -12,6 +12,7 @@
 	padding-right: 0.5em;
 	line-height: 2em;
 	text-align: right;
+	box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.2) inset;
 	background-color: #EEE;
 
 	&:before {
@@ -34,6 +35,6 @@
 		height: 0.5em;
 		border-radius: 1em;
 		background-color: #FFF;
-		box-shadow: 0 -1px 1px 0 rgba(0, 0, 0, 0.3);
+		box-shadow: 0 -1px 1px 0 rgba(0, 0, 0, 0.3); // XXX: perspective does not match container's
 	}
 }
