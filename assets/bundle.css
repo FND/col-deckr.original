@@ -38,6 +38,7 @@
   padding-right: 0.5em;
   line-height: 2em;
   text-align: right;
+  box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.2) inset;
   background-color: #EEE; }
   .tags > li:before {
     content: "";
