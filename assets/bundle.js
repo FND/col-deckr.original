@@ -3042,7 +3042,7 @@ store.load("./test/fixtures/store/").then(function(store) {
 
 
 },{"./store":"/Users/fnd/Dev/web/deckr/scripts/store.coffee","./ui/panel":"/Users/fnd/Dev/web/deckr/scripts/ui/panel.coffee"}],"/Users/fnd/Dev/web/deckr/scripts/store.coffee":[function(require,module,exports){
-var Card, Store, download, parse, resolve, util, webdav;
+var Card, Store, download, resolve, util, webdav;
 
 require("whatwg-fetch");
 
@@ -3059,22 +3059,30 @@ module.exports = Store = (function() {
   Store.prototype.load = function(src) {
     return this.retrieve(src).then((function(_this) {
       return function(cards) {
-        var data, i, len;
+        var card, i, len;
         for (i = 0, len = cards.length; i < len; i++) {
-          data = cards[i];
-          _this.absorb(data);
+          card = cards[i];
+          _this.absorb(card);
         }
         return _this;
       };
     })(this));
   };
 
-  Store.prototype.absorb = function(item) {
-    var base, card, i, len, ref, tag, title;
-    card = new Card(item.title, item.tags, item.body);
+  Store.prototype.save = function(card) {
+    return webdav.store(card.uri, card.serialize(), "text/plain").then((function(_this) {
+      return function() {
+        _this.absorb(card, true);
+      };
+    })(this));
+  };
+
+  Store.prototype.absorb = function(card, overwrite) {
+    var base, i, len, ref, tag, title;
     title = card.title;
-    if (this.index[title]) {
+    if (!overwrite && this.index[title]) {
       util.error("duplicate title", title);
+      return;
     }
     this.index[title] = card;
     ref = card.tags;
@@ -3106,12 +3114,31 @@ module.exports = Store = (function() {
 
 })();
 
-Card = (function() {
-  function Card(title1, tags1, body1) {
+module.exports.Card = Card = (function() {
+  function Card(uri1, title1, tags1, body1) {
+    this.uri = uri1;
     this.title = title1;
     this.tags = tags1 != null ? tags1 : [];
     this.body = body1;
   }
+
+  Card.prototype.serialize = function() {
+    var tags, title;
+    if (this.tags.length) {
+      tags = "#" + this.tags.join(" #");
+    }
+    title = "# " + this.title;
+    return [tags, title, this.body].join("\n\n");
+  };
+
+  Card.deserialize = function(txt, defaultTitle, uri) {
+    var body, lines, tags, title;
+    lines = txt.split("\n");
+    tags = lines[0].substr(1).split(" #");
+    title = lines[2] ? lines[2].substr(2) : defaultTitle;
+    body = lines.slice(3).join("\n");
+    return new Card(uri, title, tags, body);
+  };
 
   return Card;
 
@@ -3119,21 +3146,8 @@ Card = (function() {
 
 resolve = function(entry) {
   return download(entry.uri).then(function(txt) {
-    return parse(txt, entry.name);
+    return Card.deserialize(txt, entry.name, entry.uri);
   });
-};
-
-parse = function(txt, defaultTitle) {
-  var body, lines, tags, title;
-  lines = txt.split("\n");
-  tags = lines[0].substr(1).split(" #");
-  title = lines[2] ? lines[2].substr(2) : defaultTitle;
-  body = lines.slice(3).join("\n");
-  return {
-    title: title,
-    tags: tags,
-    body: body
-  };
 };
 
 download = function(uri) {
@@ -3229,9 +3243,11 @@ Tag = (function() {
 
 
 },{"./util":"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee","rivets":"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/panel.coffee":[function(require,module,exports){
-var Card, Facetor, FilterSelector, Panel, rivets, sortable, util,
+var Card, Facetor, FilterSelector, Panel, rivets, sortable, store, util,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 rivets = require("rivets");
 
@@ -3240,6 +3256,8 @@ FilterSelector = require("./filter_selector");
 sortable = require("./sortable");
 
 Facetor = require("../facetor");
+
+store = require("../store");
 
 util = require("./util");
 
@@ -3250,15 +3268,15 @@ module.exports = Panel = (function() {
       options = {};
     }
     this.onSave = bind(this.onSave, this);
-    this.onEdit = bind(this.onEdit, this);
     this.onFilter = bind(this.onFilter, this);
+    this.deck = deck;
     this.cards = (function() {
       var ref, results;
       ref = deck.index;
       results = [];
       for (title in ref) {
         card = ref[title];
-        results.push(new Card(card.title, card.tags));
+        results.push(new Card(card.uri, card.title, card.tags));
       }
       return results;
     })();
@@ -3299,27 +3317,31 @@ module.exports = Panel = (function() {
 
   Panel.prototype.onSave = function(ev, rv) {
     rv.card.editMode = false;
+    this.deck.save(rv.card);
   };
 
   return Panel;
 
 })();
 
-Card = (function() {
-  function Card(title1, tags1, disabled, editMode) {
+Card = (function(superClass) {
+  extend(Card, superClass);
+
+  function Card(uri, title1, tags1) {
+    this.uri = uri;
     this.title = title1;
     this.tags = tags1;
-    this.disabled = disabled;
-    this.editMode = editMode;
+    this.disabled = false;
+    this.editMode = false;
   }
 
   return Card;
 
-})();
+})(store.Card);
 
 
 
-},{"../facetor":"/Users/fnd/Dev/web/deckr/scripts/facetor.coffee","./filter_selector":"/Users/fnd/Dev/web/deckr/scripts/ui/filter_selector.coffee","./sortable":"/Users/fnd/Dev/web/deckr/scripts/ui/sortable.coffee","./util":"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee","rivets":"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/sortable.coffee":[function(require,module,exports){
+},{"../facetor":"/Users/fnd/Dev/web/deckr/scripts/facetor.coffee","../store":"/Users/fnd/Dev/web/deckr/scripts/store.coffee","./filter_selector":"/Users/fnd/Dev/web/deckr/scripts/ui/filter_selector.coffee","./sortable":"/Users/fnd/Dev/web/deckr/scripts/ui/sortable.coffee","./util":"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee","rivets":"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/sortable.coffee":[function(require,module,exports){
 var Sortable;
 
 Sortable = require("sortablejs");
@@ -3387,6 +3409,20 @@ var name2entry, xml;
 require("whatwg-fetch");
 
 xml = require("dav-dump/src/xml");
+
+exports.store = function(uri, content, contentType) {
+  var options;
+  options = {
+    method: "PUT",
+    body: content
+  };
+  if (contentType) {
+    options.headers = {
+      "Content-Type": contentType
+    };
+  }
+  return fetch(uri, options);
+};
 
 exports.ls = function(uri) {
   var prom;
