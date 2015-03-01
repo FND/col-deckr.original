@@ -7,7 +7,8 @@ util = require("./util")
 module.exports = class Panel
 
 	constructor: (deck, options = {}) -> # XXX: `deck` means tight coupling to store!?
-		@cards = (new Card(card.title, card.tags) for title, card of deck.index)
+		@cards = for title, card of deck.index
+			new Card(card.uri, card.title, card.tags)
 
 		@container = util.getTemplate("panel")
 		list = @container.querySelector(".deck")
@@ -39,5 +40,5 @@ module.exports = class Panel
 		rv.card.editMode = false
 		return
 
-class Card
-	constructor: (@title, @tags, @disabled, @editMode) ->
+class Card # XXX: largely duplicates store's `Card`
+	constructor: (@uri, @title, @tags, @disabled, @editMode) ->
