@@ -2,12 +2,15 @@ rivets = require("rivets")
 FilterSelector = require("./filter_selector")
 sortable = require("./sortable")
 Facetor = require("../facetor")
+store = require("../store") # XXX: bad dependency
 util = require("./util")
 
 module.exports = class Panel
 
 	constructor: (deck, options = {}) -> # XXX: `deck` means tight coupling to store!?
-		@cards = (new Card(card.title, card.tags) for title, card of deck.index)
+		@deck = deck
+		@cards = for title, card of deck.index
+			new Card(card.uri, card.title, card.tags)
 
 		@container = util.getTemplate("panel")
 		list = @container.querySelector(".deck")
@@ -31,13 +34,17 @@ module.exports = class Panel
 		for card in @cards
 			card.disabled = card.title not in @facetor.titles
 
-	onEdit: (ev, rv) =>
+	onEdit: (ev, rv) ->
 		rv.card.editMode = true
 		return
 
 	onSave: (ev, rv) =>
 		rv.card.editMode = false
+		@deck.save(rv.card) # TODO: error handling
 		return
 
-class Card
-	constructor: (@title, @tags, @disabled, @editMode) ->
+class Card extends store.Card # XXX: smell?
+
+	constructor: (@uri, @title, @tags) ->
+		@disabled = false
+		@editMode = false
