@@ -3249,6 +3249,8 @@ module.exports = Panel = (function() {
     if (options == null) {
       options = {};
     }
+    this.onSave = bind(this.onSave, this);
+    this.onEdit = bind(this.onEdit, this);
     this.onFilter = bind(this.onFilter, this);
     this.cards = (function() {
       var ref, results;
@@ -3291,15 +3293,24 @@ module.exports = Panel = (function() {
     return results;
   };
 
+  Panel.prototype.onEdit = function(ev, rv) {
+    rv.card.editMode = true;
+  };
+
+  Panel.prototype.onSave = function(ev, rv) {
+    rv.card.editMode = false;
+  };
+
   return Panel;
 
 })();
 
 Card = (function() {
-  function Card(title1, tags1, disabled) {
+  function Card(title1, tags1, disabled, editMode) {
     this.title = title1;
     this.tags = tags1;
     this.disabled = disabled;
+    this.editMode = editMode;
   }
 
   return Card;

@@ -4,15 +4,32 @@
   list-style-type: none; }
 
 .card, .deck > li {
+  position: relative;
   width: 15em;
   height: 21em;
   float: left;
   margin: 0 0.5em 0.5em 0;
-  border: 1px solid #000;
+  border: 1px solid #AAA;
   border-radius: 5px;
-  line-height: 21em;
   text-align: center;
   background-color: #EEE; }
+  .card .title, .deck > li .title, .card .editor, .deck > li .editor {
+    position: absolute;
+    bottom: 0.5em;
+    right: 0.5em; }
+  .card .editor input, .deck > li .editor input {
+    text-align: right; }
+  .card .controls, .deck > li .controls {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    font-size: 1.2em;
+    list-style-type: none;
+    cursor: pointer; }
+    .card .controls .edit, .deck > li .controls .edit {
+      -webkit-transform: scale(-1, 1);
+          -ms-transform: scale(-1, 1);
+              transform: scale(-1, 1); }
 
 .filter-selector li {
   cursor: pointer; }
