@@ -14,10 +14,18 @@ module.exports = class Store
 			@absorb(card) for card in cards
 			return @)
 
+	save: (card) ->
+		return webdav.store(card.uri, card.serialize(), "text/plain").
+			then(=>
+				@absorb(card, true)
+				return)
+
 	# integrate an individual card
-	absorb: (card) ->
+	absorb: (card, overwrite) ->
 		title = card.title
-		util.error("duplicate title", title) if @index[title] # TODO: abort?
+		if !overwrite and @index[title]
+			util.error("duplicate title", title) # TODO: throw exception?
+			return
 		@index[title] = card
 
 		for tag in card.tags
@@ -33,21 +41,27 @@ module.exports = class Store
 				items = (resolve(file) for file in files)
 				return Promise.all(items))
 
-class Card
+module.exports.Card = class Card
+
 	constructor: (@uri, @title, @tags = [], @body) -> # TODO: validate (title, individual tags)
+
+	# TODO: document serialization format
+
+	serialize: ->
+		tags = "#" + @tags.join(" #") if @tags.length
+		title = "# " + @title
+		return [tags, title, @body].join("\n\n")
+
+	@deserialize: (txt, defaultTitle, uri) ->
+		lines = txt.split("\n")
+		tags = lines[0].substr(1).split(" #")
+		title = if lines[2] then lines[2].substr(2) else defaultTitle
+		body = lines.slice(3).join("\n")
+		return new Card(uri, title, tags, body)
 
 resolve = (entry) ->
 	return download(entry.uri).
-		then((txt) ->
-			item = parse(txt, entry.name)
-			return new Card(entry.uri, item.title, item.tags, item.body))
-
-parse = (txt, defaultTitle) -> # TODO: rename, document
-	lines = txt.split("\n")
-	tags = lines[0].substr(1).split(" #")
-	title = if lines[2] then lines[2].substr(2) else defaultTitle
-	body = lines.slice(3).join("\n")
-	return { title, tags, body }
+		then((txt) -> Card.deserialize(txt, entry.name, entry.uri))
 
 download = (uri) ->
 	return fetch(uri, method: "GET").

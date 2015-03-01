@@ -1,6 +1,11 @@
 require("whatwg-fetch") # auto-registers globals
 xml = require("dav-dump/src/xml")
 
+exports.store = (uri, content, contentType) -> # TODO: prevent clobbering via ETag
+	options = { method: "PUT", body: content }
+	options.headers = { "Content-Type": contentType } if contentType
+	return fetch(uri, options)
+
 # returns a promise for a tuple of directories and files, with each entry being
 # a `{ name, uri }` object
 exports.ls = (uri) ->
