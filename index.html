@@ -12,7 +12,19 @@
 
 	<div id="panel-template" class="panel template">
 		<ul class="deck">
-			<li rv-each-card="cards" rv-hide="card.disabled">{ card.title }</li>
+			<li rv-each-card="cards" rv-hide="card.disabled">
+				<ul class="controls">
+					<li class="edit" rv-on-click="onEdit"
+							rv-unless="card.editMode">✎</li>
+					<li rv-on-click="onSave" rv-if="card.editMode">✓</li>
+				</ul>
+				<span class="title" rv-unless="card.editMode">
+					{ card.title }
+				</span>
+				<form class="editor" rv-if="card.editMode">
+					<input type="text" rv-value="card.title">
+				</form>
+			</li>
 		</ul>
 	</div>
 
