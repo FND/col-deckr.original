@@ -31,5 +31,13 @@ module.exports = class Panel
 		for card in @cards
 			card.disabled = card.title not in @facetor.titles
 
+	onEdit: (ev, rv) =>
+		rv.card.editMode = true
+		return
+
+	onSave: (ev, rv) =>
+		rv.card.editMode = false
+		return
+
 class Card
-	constructor: (@title, @tags, @disabled) ->
+	constructor: (@title, @tags, @disabled, @editMode) ->

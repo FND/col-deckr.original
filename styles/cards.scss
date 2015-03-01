@@ -9,14 +9,37 @@
 }
 
 .card {
-	$height: 21em;
+	position: relative;
 	width: 15em;
-	height: $height;
+	height: 21em;
 	float: left;
 	margin: 0 0.5em 0.5em 0;
-	border: 1px solid #000;
+	border: 1px solid #AAA;
 	border-radius: 5px;
-	line-height: $height;
 	text-align: center;
 	background-color: #EEE;
+
+	.title,
+	.editor {
+		position: absolute;
+		bottom: 0.5em;
+		right: 0.5em;
+	}
+
+	.editor input {
+		text-align: right;
+	}
+
+	.controls {
+		position: absolute;
+		top: 0.5em;
+		right: 0.5em;
+		font-size: 1.2em;
+		list-style-type: none;
+		cursor: pointer;
+
+		.edit {
+			transform: scale(-1, 1); // mirror/flip
+		}
+	}
 }
