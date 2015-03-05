@@ -3042,7 +3042,7 @@ store.load("./test/fixtures/store/").then(function(store) {
 
 
 },{"./store":"/Users/fnd/Dev/web/deckr/scripts/store.coffee","./ui/panel":"/Users/fnd/Dev/web/deckr/scripts/ui/panel.coffee"}],"/Users/fnd/Dev/web/deckr/scripts/store.coffee":[function(require,module,exports){
-var Card, Store, download, resolve, util, webdav;
+var Store, Tiddler, download, resolve, util, webdav;
 
 require("whatwg-fetch");
 
@@ -3058,38 +3058,38 @@ module.exports = Store = (function() {
 
   Store.prototype.load = function(src) {
     return this.retrieve(src).then((function(_this) {
-      return function(cards) {
-        var card, i, len;
-        for (i = 0, len = cards.length; i < len; i++) {
-          card = cards[i];
-          _this.absorb(card);
+      return function(tiddlers) {
+        var i, len, tiddler;
+        for (i = 0, len = tiddlers.length; i < len; i++) {
+          tiddler = tiddlers[i];
+          _this.absorb(tiddler);
         }
         return _this;
       };
     })(this));
   };
 
-  Store.prototype.save = function(card) {
-    return webdav.store(card.uri, card.serialize(), "text/plain").then((function(_this) {
+  Store.prototype.save = function(tiddler) {
+    return webdav.store(tiddler.uri, tiddler.serialize(), "text/plain").then((function(_this) {
       return function() {
-        _this.absorb(card, true);
+        _this.absorb(tiddler, true);
       };
     })(this));
   };
 
-  Store.prototype.absorb = function(card, overwrite) {
+  Store.prototype.absorb = function(tiddler, overwrite) {
     var base, i, len, ref, tag, title;
-    title = card.title;
+    title = tiddler.title;
     if (!overwrite && this.index[title]) {
       util.error("duplicate title", title);
       return;
     }
-    this.index[title] = card;
-    ref = card.tags;
+    this.index[title] = tiddler;
+    ref = tiddler.tags;
     for (i = 0, len = ref.length; i < len; i++) {
       tag = ref[i];
       (base = this.tags)[tag] || (base[tag] = []);
-      this.tags[tag].push(card);
+      this.tags[tag].push(tiddler);
     }
   };
 
@@ -3114,15 +3114,15 @@ module.exports = Store = (function() {
 
 })();
 
-module.exports.Card = Card = (function() {
-  function Card(uri1, title1, tags1, body1) {
+module.exports.Tiddler = Tiddler = (function() {
+  function Tiddler(uri1, title1, tags1, body1) {
     this.uri = uri1;
     this.title = title1;
     this.tags = tags1 != null ? tags1 : [];
     this.body = body1;
   }
 
-  Card.prototype.serialize = function() {
+  Tiddler.prototype.serialize = function() {
     var tags, title;
     if (this.tags.length) {
       tags = "#" + this.tags.join(" #");
@@ -3131,22 +3131,22 @@ module.exports.Card = Card = (function() {
     return [tags, title, this.body].join("\n\n");
   };
 
-  Card.deserialize = function(txt, defaultTitle, uri) {
+  Tiddler.deserialize = function(txt, defaultTitle, uri) {
     var body, lines, tags, title;
     lines = txt.split("\n");
     tags = lines[0].substr(1).split(" #");
     title = lines[2] ? lines[2].substr(2) : defaultTitle;
     body = lines.slice(3).join("\n");
-    return new Card(uri, title, tags, body);
+    return new Tiddler(uri, title, tags, body);
   };
 
-  return Card;
+  return Tiddler;
 
 })();
 
 resolve = function(entry) {
   return download(entry.uri).then(function(txt) {
-    return Card.deserialize(txt, entry.name, entry.uri);
+    return Tiddler.deserialize(txt, entry.name, entry.uri);
   });
 };
 
@@ -3243,11 +3243,9 @@ Tag = (function() {
 
 
 },{"./util":"/Users/fnd/Dev/web/deckr/scripts/ui/util.coffee","rivets":"/Users/fnd/Dev/web/deckr/node_modules/rivets/dist/rivets.js"}],"/Users/fnd/Dev/web/deckr/scripts/ui/panel.coffee":[function(require,module,exports){
-var Card, Facetor, FilterSelector, Panel, rivets, sortable, store, util,
+var Card, Facetor, FilterSelector, Panel, Tiddler, rivets, sortable, util,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 rivets = require("rivets");
 
@@ -3257,26 +3255,26 @@ sortable = require("./sortable");
 
 Facetor = require("../facetor");
 
-store = require("../store");
+Tiddler = require("../store").Tiddler;
 
 util = require("./util");
 
 module.exports = Panel = (function() {
-  function Panel(deck, options) {
+  function Panel(store, options) {
     var card, list, tags, title;
     if (options == null) {
       options = {};
     }
     this.onSave = bind(this.onSave, this);
     this.onFilter = bind(this.onFilter, this);
-    this.deck = deck;
+    this.store = store;
     this.cards = (function() {
       var ref, results;
-      ref = deck.index;
+      ref = store.index;
       results = [];
       for (title in ref) {
         card = ref[title];
-        results.push(new Card(card.uri, card.title, card.tags));
+        results.push(new Card(card.title, card.tags));
       }
       return results;
     })();
@@ -3284,8 +3282,8 @@ module.exports = Panel = (function() {
     list = this.container.querySelector(".deck");
     rivets.bind(this.container, this);
     if (options.filterable) {
-      tags = Object.keys(deck.tags).sort();
-      this.facetor = new Facetor(deck.index, tags);
+      tags = Object.keys(this.store.tags).sort();
+      this.facetor = new Facetor(this.store.index, tags);
       this.filter = new FilterSelector(tags, {
         onChange: this.onFilter
       });
@@ -3316,28 +3314,34 @@ module.exports = Panel = (function() {
   };
 
   Panel.prototype.onSave = function(ev, rv) {
-    rv.card.editMode = false;
-    this.deck.save(rv.card);
+    var card, tid, uri;
+    card = rv.card;
+    card.editMode = false;
+    uri = this.store.index[card.originalTitle].uri;
+    tid = new Tiddler(uri, card.title, card.tags);
+    this.store.save(tid).then((function(_this) {
+      return function() {
+        return _this.store.remove(card.originalTitle);
+      };
+    })(this));
   };
 
   return Panel;
 
 })();
 
-Card = (function(superClass) {
-  extend(Card, superClass);
-
-  function Card(uri, title1, tags1) {
-    this.uri = uri;
+Card = (function() {
+  function Card(title1, tags1) {
     this.title = title1;
     this.tags = tags1;
+    this.originalTitle = this.title;
     this.disabled = false;
     this.editMode = false;
   }
 
   return Card;
 
-})(store.Card);
+})();
 
 
 
