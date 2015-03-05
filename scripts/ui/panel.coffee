@@ -42,14 +42,15 @@ module.exports = class Panel
 		card = rv.card
 		card.editMode = false
 
-		title = card.title
-		uri = @store.index[title].uri # FIXME: fails for renames
-		tid = new Tiddler(uri, title, card.tags)
-		@store.save(tid) # TODO: error handling
+		uri = @store.index[card.originalTitle].uri
+		tid = new Tiddler(uri, card.title, card.tags)
+		@store.save(tid). # TODO: error handling -- TODO: renames should be encapsulated within store
+			then(=> @store.remove(card.originalTitle)) # FIXME: currently unsupported by store
 		return
 
 class Card
 
 	constructor: (@title, @tags) ->
+		@originalTitle = @title # XXX: smell? required due to two-way data binding
 		@disabled = false
 		@editMode = false
