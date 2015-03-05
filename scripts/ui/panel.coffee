@@ -2,23 +2,23 @@ rivets = require("rivets")
 FilterSelector = require("./filter_selector")
 sortable = require("./sortable")
 Facetor = require("../facetor")
-store = require("../store") # XXX: bad dependency
+Tiddler = require("../store").Tiddler
 util = require("./util")
 
 module.exports = class Panel
 
-	constructor: (deck, options = {}) -> # XXX: `deck` means tight coupling to store!?
-		@deck = deck
-		@cards = for title, card of deck.index
-			new Card(card.uri, card.title, card.tags)
+	constructor: (store, options = {}) ->
+		@store = store # XXX: tight coupling!?
+		@cards = for title, card of store.index
+			new Card(card.title, card.tags)
 
 		@container = util.getTemplate("panel")
 		list = @container.querySelector(".deck")
 		rivets.bind(@container, @)
 
 		if options.filterable
-			tags = Object.keys(deck.tags).sort()
-			@facetor = new Facetor(deck.index, tags)
+			tags = Object.keys(@store.tags).sort()
+			@facetor = new Facetor(@store.index, tags)
 			@filter = new FilterSelector(tags, onChange: @onFilter)
 			util.prepend(@filter.container, @container) # XXX: belongs into template!?
 
@@ -39,12 +39,17 @@ module.exports = class Panel
 		return
 
 	onSave: (ev, rv) =>
-		rv.card.editMode = false
-		@deck.save(rv.card) # TODO: error handling
+		card = rv.card
+		card.editMode = false
+
+		title = card.title
+		uri = @store.index[title].uri # FIXME: fails for renames
+		tid = new Tiddler(uri, title, card.tags)
+		@store.save(tid) # TODO: error handling
 		return
 
-class Card extends store.Card # XXX: smell?
+class Card
 
-	constructor: (@uri, @title, @tags) ->
+	constructor: (@title, @tags) ->
 		@disabled = false
 		@editMode = false
