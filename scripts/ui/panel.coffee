@@ -9,8 +9,8 @@ module.exports = class Panel
 
 	constructor: (store, options = {}) ->
 		@store = store # XXX: tight coupling!?
-		@cards = for title, card of store.index
-			new Card(card.title, card.tags)
+		@cards = for title, tiddler of store.index
+			new Card(tiddler.title, tiddler.tags, tiddler.body.trim())
 
 		@container = util.getTemplate("panel")
 		list = @container.querySelector(".deck")
@@ -50,7 +50,7 @@ module.exports = class Panel
 
 class Card
 
-	constructor: (@title, @tags) ->
+	constructor: (@title, @tags, @image) ->
 		@originalTitle = @title # XXX: smell? required due to two-way data binding
 		@disabled = false
 		@editMode = false

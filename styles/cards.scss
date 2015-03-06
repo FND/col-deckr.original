@@ -17,13 +17,19 @@
 	border: 1px solid #AAA;
 	border-radius: 5px;
 	text-align: center;
-	background-color: #EEE;
+	background-color: #333;
 
 	.title,
 	.editor {
 		position: absolute;
 		bottom: 0.5em;
 		right: 0.5em;
+	}
+
+	.title,
+	.controls {
+		text-shadow: #333 2px 2px 5px;
+		color: #FFF;
 	}
 
 	.editor input {
@@ -41,5 +47,13 @@
 		.edit {
 			transform: scale(-1, 1); // mirror/flip
 		}
+	}
+
+	img {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
 	}
 }
