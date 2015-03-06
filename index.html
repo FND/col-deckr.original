@@ -13,6 +13,7 @@
 	<div id="panel-template" class="panel template">
 		<ul class="deck">
 			<li rv-each-card="cards" rv-hide="card.disabled">
+				<img rv-src="card.image"> <!-- XXX: CSS more appropriate!? -->
 				<ul class="controls">
 					<li class="edit" rv-on-click="onEdit"
 							rv-unless="card.editMode">✎</li>
