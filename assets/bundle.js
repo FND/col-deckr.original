@@ -3261,7 +3261,7 @@ util = require("./util");
 
 module.exports = Panel = (function() {
   function Panel(store, options) {
-    var card, list, tags, title;
+    var list, tags, tiddler, title;
     if (options == null) {
       options = {};
     }
@@ -3273,8 +3273,8 @@ module.exports = Panel = (function() {
       ref = store.index;
       results = [];
       for (title in ref) {
-        card = ref[title];
-        results.push(new Card(card.title, card.tags));
+        tiddler = ref[title];
+        results.push(new Card(tiddler.title, tiddler.tags, tiddler.body.trim()));
       }
       return results;
     })();
@@ -3331,9 +3331,10 @@ module.exports = Panel = (function() {
 })();
 
 Card = (function() {
-  function Card(title1, tags1) {
+  function Card(title1, tags1, image) {
     this.title = title1;
     this.tags = tags1;
+    this.image = image;
     this.originalTitle = this.title;
     this.disabled = false;
     this.editMode = false;

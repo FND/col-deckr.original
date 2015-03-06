@@ -12,11 +12,14 @@
   border: 1px solid #AAA;
   border-radius: 5px;
   text-align: center;
-  background-color: #EEE; }
+  background-color: #333; }
   .card .title, .deck > li .title, .card .editor, .deck > li .editor {
     position: absolute;
     bottom: 0.5em;
     right: 0.5em; }
+  .card .title, .deck > li .title, .card .controls, .deck > li .controls {
+    text-shadow: #333 2px 2px 5px;
+    color: #FFF; }
   .card .editor input, .deck > li .editor input {
     text-align: right; }
   .card .controls, .deck > li .controls {
@@ -30,6 +33,12 @@
       -webkit-transform: scale(-1, 1);
           -ms-transform: scale(-1, 1);
               transform: scale(-1, 1); }
+  .card img, .deck > li img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; }
 
 .filter-selector li {
   cursor: pointer; }
