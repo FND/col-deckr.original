@@ -16,8 +16,11 @@ module.exports = class Store
 			return @)
 
 	save: (tiddler) ->
-		return webdav.store(tiddler.uri, tiddler.serialize(), "text/plain").
-			then(=>
+		options = { contentType: "text/plain", etag: tiddler.etag }
+		return webdav.store(tiddler.uri, tiddler.serialize(), options).
+			then((res) =>
+				etag = res.headers.get("ETag")
+				tiddler.etag = etag if etag
 				@absorb(tiddler, true)
 				return)
 
@@ -45,7 +48,7 @@ module.exports = class Store
 module.exports.Tiddler = class Tiddler # XXX: does not belong here?
 
 	# TODO: validation? (title, individual tags)
-	constructor: (@uri, @title, @tags = [], @body) ->
+	constructor: (@uri, @title, @tags = [], @body, @etag) ->
 
 	# TODO: document serialization format (and write tests)
 
@@ -54,17 +57,24 @@ module.exports.Tiddler = class Tiddler # XXX: does not belong here?
 		title = "# " + @title
 		return [tags, title, @body].join("\n\n")
 
-	@deserialize: (txt, defaultTitle, uri) ->
+	@deserialize: (txt, defaultTitle) ->
 		lines = txt.split("\n")
 		tags = lines[0].substr(1).split(" #")
 		title = if lines[2] then lines[2].substr(2) else defaultTitle
 		body = lines.slice(3).join("\n")
-		return new Tiddler(uri, title, tags, body)
+		return new Tiddler(null, title, tags, body)
 
 resolve = (entry) ->
 	return download(entry.uri).
-		then((txt) -> Tiddler.deserialize(txt, entry.name, entry.uri))
+		then(([txt, etag]) ->
+			tiddler = Tiddler.deserialize(txt, entry.name)
+			tiddler.uri = entry.uri
+			tiddler.etag = etag if etag
+			return tiddler)
 
 download = (uri) ->
 	return fetch(uri, method: "GET").
-		then((res) -> res.text())
+		then((res) ->
+			etag = res.headers.get("ETag")
+			return res.text().
+				then((txt) -> [txt, etag]))

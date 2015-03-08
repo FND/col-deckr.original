@@ -1,0 +1,27 @@
+.controls {
+	list-style-type: none;
+	cursor: pointer;
+
+	.edit {
+		transform: scale(-1, 1); // mirror/flip
+	}
+}
+
+.control.add { // XXX: inconsistent
+	display: block;
+	float: left;
+	width: 1em;
+	height: 1em;
+	margin-bottom: 0.5em; // XXX: magic number, non-generic
+	border: 1px solid gray;
+	border-radius: 1em;
+	font-size: 2em;
+	line-height: 1em;
+	text-align: center;
+	transition: transform 0.5s ease 0s;
+	cursor: pointer;
+
+	&.active {
+		transform: rotate(45deg);
+	}
+}

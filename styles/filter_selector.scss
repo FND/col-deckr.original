@@ -1,9 +1,14 @@
+.filter-selector {
+	overflow: auto; // contain floats
+}
+
 .filter-selector li {
 	cursor: pointer;
 }
 
 .filter-selector .selection {
 	overflow: auto; // contain floats
+	margin-top: 0;
 	padding: 0;
 	list-style-type: none;
 
@@ -11,4 +16,9 @@
 		float: left;
 		margin-right: 0.5em;
 	}
+}
+
+.filter-selector .menu {
+	clear: left;
+	margin-left: -1em; // XXX: magic number
 }

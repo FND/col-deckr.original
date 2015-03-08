@@ -18,6 +18,9 @@ module.exports = class FilterSelector
 		@update(rv.tag, false)
 		return
 
+	onToggleMenu: (ev, rv) =>
+		@menuActive = !@menuActive
+
 	setCandidates: (tagNames) ->
 		for tag in @tags
 			tag.set("disabled", tag.name not in tagNames) # XXX: inefficient

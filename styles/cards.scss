@@ -32,21 +32,15 @@
 		color: #FFF;
 	}
 
-	.editor input {
-		text-align: right;
-	}
-
 	.controls {
 		position: absolute;
 		top: 0.5em;
 		right: 0.5em;
 		font-size: 1.2em;
-		list-style-type: none;
-		cursor: pointer;
+	}
 
-		.edit {
-			transform: scale(-1, 1); // mirror/flip
-		}
+	.editor input {
+		text-align: right;
 	}
 
 	img {

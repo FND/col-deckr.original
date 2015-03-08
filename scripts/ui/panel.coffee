@@ -42,8 +42,8 @@ module.exports = class Panel
 		card = rv.card
 		card.editMode = false
 
-		uri = @store.index[card.originalTitle].uri
-		tid = new Tiddler(uri, card.title, card.tags)
+		origin = @store.index[card.originalTitle]
+		tid = new Tiddler(origin.uri, card.title, card.tags, null, origin.etag)
 		@store.save(tid). # TODO: error handling -- TODO: renames should be encapsulated within store
 			then(=> @store.remove(card.originalTitle)) # FIXME: currently unsupported by store
 		return
