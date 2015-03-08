@@ -3070,8 +3070,18 @@ module.exports = Store = (function() {
   };
 
   Store.prototype.save = function(tiddler) {
-    return webdav.store(tiddler.uri, tiddler.serialize(), "text/plain").then((function(_this) {
-      return function() {
+    var options;
+    options = {
+      contentType: "text/plain",
+      etag: tiddler.etag
+    };
+    return webdav.store(tiddler.uri, tiddler.serialize(), options).then((function(_this) {
+      return function(res) {
+        var etag;
+        etag = res.headers.get("ETag");
+        if (etag) {
+          tiddler.etag = etag;
+        }
         _this.absorb(tiddler, true);
       };
     })(this));
@@ -3115,11 +3125,12 @@ module.exports = Store = (function() {
 })();
 
 module.exports.Tiddler = Tiddler = (function() {
-  function Tiddler(uri1, title1, tags1, body1) {
+  function Tiddler(uri1, title1, tags1, body1, etag1) {
     this.uri = uri1;
     this.title = title1;
     this.tags = tags1 != null ? tags1 : [];
     this.body = body1;
+    this.etag = etag1;
   }
 
   Tiddler.prototype.serialize = function() {
@@ -3131,13 +3142,13 @@ module.exports.Tiddler = Tiddler = (function() {
     return [tags, title, this.body].join("\n\n");
   };
 
-  Tiddler.deserialize = function(txt, defaultTitle, uri) {
+  Tiddler.deserialize = function(txt, defaultTitle) {
     var body, lines, tags, title;
     lines = txt.split("\n");
     tags = lines[0].substr(1).split(" #");
     title = lines[2] ? lines[2].substr(2) : defaultTitle;
     body = lines.slice(3).join("\n");
-    return new Tiddler(uri, title, tags, body);
+    return new Tiddler(null, title, tags, body);
   };
 
   return Tiddler;
@@ -3145,8 +3156,15 @@ module.exports.Tiddler = Tiddler = (function() {
 })();
 
 resolve = function(entry) {
-  return download(entry.uri).then(function(txt) {
-    return Tiddler.deserialize(txt, entry.name, entry.uri);
+  return download(entry.uri).then(function(arg) {
+    var etag, tiddler, txt;
+    txt = arg[0], etag = arg[1];
+    tiddler = Tiddler.deserialize(txt, entry.name);
+    tiddler.uri = entry.uri;
+    if (etag) {
+      tiddler.etag = etag;
+    }
+    return tiddler;
   });
 };
 
@@ -3154,7 +3172,11 @@ download = function(uri) {
   return fetch(uri, {
     method: "GET"
   }).then(function(res) {
-    return res.text();
+    var etag;
+    etag = res.headers.get("ETag");
+    return res.text().then(function(txt) {
+      return [txt, etag];
+    });
   });
 };
 
@@ -3175,6 +3197,7 @@ module.exports = FilterSelector = (function() {
     if (options == null) {
       options = {};
     }
+    this.onToggleMenu = bind(this.onToggleMenu, this);
     this.onDeselect = bind(this.onDeselect, this);
     this.onSelect = bind(this.onSelect, this);
     this.tags = (function() {
@@ -3197,6 +3220,10 @@ module.exports = FilterSelector = (function() {
 
   FilterSelector.prototype.onDeselect = function(ev, rv) {
     this.update(rv.tag, false);
+  };
+
+  FilterSelector.prototype.onToggleMenu = function(ev, rv) {
+    return this.menuActive = !this.menuActive;
   };
 
   FilterSelector.prototype.setCandidates = function(tagNames) {
@@ -3314,11 +3341,11 @@ module.exports = Panel = (function() {
   };
 
   Panel.prototype.onSave = function(ev, rv) {
-    var card, tid, uri;
+    var card, origin, tid;
     card = rv.card;
     card.editMode = false;
-    uri = this.store.index[card.originalTitle].uri;
-    tid = new Tiddler(uri, card.title, card.tags);
+    origin = this.store.index[card.originalTitle];
+    tid = new Tiddler(origin.uri, card.title, card.tags, null, origin.etag);
     this.store.save(tid).then((function(_this) {
       return function() {
         return _this.store.remove(card.originalTitle);
@@ -3415,18 +3442,20 @@ require("whatwg-fetch");
 
 xml = require("dav-dump/src/xml");
 
-exports.store = function(uri, content, contentType) {
-  var options;
-  options = {
-    method: "PUT",
-    body: content
-  };
-  if (contentType) {
-    options.headers = {
-      "Content-Type": contentType
-    };
+exports.store = function(uri, content, options) {
+  var headers;
+  headers = {};
+  if (options.etag) {
+    headers["If-Match"] = options.etag;
   }
-  return fetch(uri, options);
+  if (options.contentType) {
+    headers["Content-Type"] = options.contentType;
+  }
+  return fetch(uri, {
+    method: "PUT",
+    headers: headers,
+    body: content
+  });
 };
 
 exports.ls = function(uri) {
