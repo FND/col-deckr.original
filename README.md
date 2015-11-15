@@ -1,3 +1,8 @@
+**OBSOLETE**:
+this repo has been superseded by <https://github.com/FND/col-deckr>
+
+----
+
 Col. Deckr
 
 a simple UI for tag-based exploration of trading cards
